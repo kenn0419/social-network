@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+.ant-layout-header,
+.ant-layout-sider {
+  background-color: white;
+}
+
+.ant-menu-item {
+  padding-left: 10px !important;
+}
