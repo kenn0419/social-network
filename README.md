@@ -36,10 +36,10 @@ git clone https://github.com/kenn0419/social-network.git
 ### 2. Cài đặt backend
 cd social-network/api
 #### Cài đặt các phụ thuộc và chạy ứng dụng
-mvn install \n
+mvn install  
 mvn spring-boot:run
 
 ### 3. Cài đặt frontend
-cd social-network/web
-npm install \n
+cd social-network/web  
+npm install  
 npm run dev
