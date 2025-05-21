@@ -35,8 +35,7 @@ git clone https://github.com/kenn0419/social-network.git
 
 ### 2. Cài đặt backend
 cd social-network/api
-# Cài đặt các phụ thuộc và chạy ứng dụng
-# Ví dụ nếu dùng Maven:
+#### Cài đặt các phụ thuộc và chạy ứng dụng
 mvn install
 mvn spring-boot:run
 
