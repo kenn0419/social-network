@@ -18,9 +18,8 @@ Dự án **Social Network** là một nền tảng mạng xã hội được ph�
 
 ## 🛠️ Công nghệ sử dụng
 
-- **Backend**: Java (57.1%)
-- **Frontend**: TypeScript (41.7%)
-- **Other**: 1.2%
+- **Backend**: Java, Spring Framework
+- **Frontend**: ReactJS, Typescript, Antd, TailwindCSS
 - **Cơ sở dữ liệu**: MySQL
 - **Công nghệ khác**: Websocket, Redis
 - **Quản lý phiên bản**: Git
