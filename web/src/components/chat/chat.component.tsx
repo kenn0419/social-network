@@ -5,10 +5,12 @@ import { RiSendPlaneFill } from "react-icons/ri";
 import { FaUser } from "react-icons/fa";
 import { MessageResponse, UserResponse } from "../../types/api";
 import messageService from "../../services/messageService";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Client, IMessage } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import dayjs from "dayjs";
+import socketService from "../../services/socketService";
+import { v4 as uuidv4 } from "uuid";
 
 const Chat = ({
   currentUser,
@@ -23,6 +25,7 @@ const Chat = ({
   setMessages: Dispatch<SetStateAction<MessageResponse[]>>;
   getMessagesFromUser: (id: number) => Promise<void>;
 }) => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const userId = searchParams.get("user");
   const stompClientRef = useRef<Client | null>(null);
@@ -41,6 +44,24 @@ const Chat = ({
           getMessagesFromUser(+userId);
         }
       }
+    }
+  };
+
+  const handleStartCall = () => {
+    const stompClient = socketService.connect();
+    console.log(stompClient);
+    if (stompClient && stompClient.connected && receiver && currentUser) {
+      const newCallId = uuidv4();
+      stompClient.publish({
+        destination: "/app/call.initiate",
+        body: JSON.stringify({
+          receiverId: receiver.id,
+          callId: newCallId,
+        }),
+      });
+      navigate(`/call/${newCallId}?callerId=${currentUser.id}&initiator=true`);
+    } else {
+      message.error("Không thể bắt dầu cuộc gọi.");
     }
   };
 
@@ -115,7 +136,10 @@ const Chat = ({
             <div className="text-xs text-gray-500">Đang hoạt động</div>
           </div>
           <div className="flex space-x-2 items-center">
-            <Button className="p-2 !border-none hover:bg-gray-100 rounded-full !text-xl text-gray-600">
+            <Button
+              className="p-2 !border-none hover:bg-gray-100 rounded-full !text-xl text-gray-600"
+              onClick={handleStartCall}
+            >
               <FiPhone />
             </Button>
             <Button className="p-2 !border-none hover:bg-gray-100 rounded-full !text-xl text-gray-600">

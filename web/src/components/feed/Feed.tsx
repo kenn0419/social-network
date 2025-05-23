@@ -18,6 +18,7 @@ const Feed: React.FC = () => {
   const loadPosts = async () => {
     try {
       const response = await postService.getPosts(user?.id);
+      console.log(response);
       setPosts(response);
     } catch (error) {
       console.error("Error loading posts:", error);

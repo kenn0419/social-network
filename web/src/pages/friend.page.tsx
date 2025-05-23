@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Avatar, List, Layout } from "antd";
 import Header from "../components/layout/Header";
-import friendShipService from "../services/frienShipService";
+import friendShipService from "../services/friendShipService";
 import { useNavigate } from "react-router-dom";
 import { FriendShipResponse, UserResponse } from "../types/api";
 import { friendService } from "../services/friendService";

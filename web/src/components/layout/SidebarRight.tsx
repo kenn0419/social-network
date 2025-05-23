@@ -1,7 +1,7 @@
 import { Card, Avatar, List, Button } from "antd";
 import { FaUserFriends } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import Friend from "../friend_list/friend";
+import Contact from "../contact/contact.component";
 
 const friendRequests = [
   {
@@ -91,7 +91,7 @@ const SidebarRight: React.FC = () => {
       </Card>
 
       {/* Contacts */}
-      <Friend />
+      <Contact />
     </div>
   );
 };

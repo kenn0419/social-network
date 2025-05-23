@@ -7,8 +7,10 @@ import { friendService, FriendWithStatus } from "../../services/friendService";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import { useAppSelector } from "../../store";
+import { useNavigate } from "react-router-dom";
 
-const Friend: React.FC = () => {
+const Contact: React.FC = () => {
+  const navigate = useNavigate();
   const [friends, setFriends] = useState<FriendWithStatus[]>([]);
   const [searchText, setSearchText] = useState("");
   const stompClientRef = useRef<Client | null>(null);
@@ -179,7 +181,10 @@ const Friend: React.FC = () => {
         itemLayout="horizontal"
         dataSource={filteredFriends}
         renderItem={(item) => (
-          <List.Item className="hover:bg-[#f0f2f5] rounded-lg transition-all cursor-pointer p-2 text-[15px]">
+          <List.Item
+            className="hover:bg-[#f0f2f5] rounded-lg transition-all cursor-pointer p-2 text-[15px]"
+            onClick={() => navigate(`/chat/?user=${item.userResponse.id}`)}
+          >
             <List.Item.Meta
               className="!items-center"
               avatar={
@@ -212,4 +217,4 @@ const Friend: React.FC = () => {
   );
 };
 
-export default Friend;
+export default Contact;

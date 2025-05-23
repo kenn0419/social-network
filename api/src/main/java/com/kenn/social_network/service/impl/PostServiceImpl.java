@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -116,9 +117,18 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         List<Long> friendIds = friendShipRepository.findFriendIds(userId);
         friendIds.add(userId);
-        LocalDateTime fromDate = LocalDateTime.now().minusDays(7);
+        int[] daysList = {7, 14, 30};
 
-        List<Post> posts = postRepository.findRecentPostsOfUserAndFriends(friendIds, fromDate);
+        List<Post> posts = new ArrayList<>();
+
+        for (int days : daysList) {
+            LocalDateTime fromDate = LocalDateTime.now().minusDays(days);
+            posts = postRepository.findRecentPostsOfUserAndFriends(friendIds, fromDate);
+
+            if (!posts.isEmpty()) {
+                break;
+            }
+        }
 
         return posts.stream().map(post -> convertUtil.toPostResponse(post, currentUser)).toList();
     }

@@ -47,23 +47,24 @@ class SocketService {
       this.client.onStompError = (frame: IFrame) => {
         notification.error({
           message: "WebSocket Error",
-          description: "Failed to connect to notification service",
+          description: "Failed to connect to notification service" + frame,
         });
       };
 
       this.client.onWebSocketError = (event) => {
         notification.error({
           message: "WebSocket Error",
-          description: "Connection error occurred",
+          description: event,
         });
       };
 
       this.client.onWebSocketClose = (event) => {
-        console.log("Connection Closed");
+        console.log("Connection Closed", event);
       };
 
       this.client.activate();
     }
+    return this.client;
   }
 
   private subscribeToNotifications() {
