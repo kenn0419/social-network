@@ -1,6 +1,6 @@
 package com.kenn.social_network.dto.request.user;
 
-import com.kenn.social_network.enums.UserStatus;
+import com.kenn.social_network.enums.UserStatusEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -36,5 +36,5 @@ public class UserCreationRequest {
 
     private String bio;
 
-    private UserStatus status;
+    private UserStatusEnum status;
 }

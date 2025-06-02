@@ -6,8 +6,8 @@ import com.kenn.social_network.dto.request.auth.AuthLoginRequest;
 import com.kenn.social_network.dto.request.auth.AuthRegisterRequest;
 import com.kenn.social_network.dto.response.auth.AuthResponse;
 import com.kenn.social_network.enums.RoleEnum;
-import com.kenn.social_network.enums.TokenType;
-import com.kenn.social_network.enums.UserStatus;
+import com.kenn.social_network.enums.TokenTypeEnum;
+import com.kenn.social_network.enums.UserStatusEnum;
 import com.kenn.social_network.exception.EmailAlreadyExistsException;
 import com.kenn.social_network.exception.ExpiredTokenVerifyAccountException;
 import com.kenn.social_network.exception.RefreshTokenInvalidException;
@@ -20,7 +20,6 @@ import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -80,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
         User user = (User)redisUtil.getInfoByToken(token);
 
         if (user != null) {
-            user.setStatus(UserStatus.ACTIVE);
+            user.setStatus(UserStatusEnum.ACTIVE);
             Role userRole = roleRepository.findByName(RoleEnum.USER.name());
             user.setRole(userRole);
             userRepository.save(user);
@@ -103,8 +102,8 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(authLoginRequest.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        String accessToken = jwtUtil.generateToken(user, TokenType.ACCESS_TOKEN);
-        String refreshToken = jwtUtil.generateToken(user, TokenType.REFRESH_TOKEN);
+        String accessToken = jwtUtil.generateToken(user, TokenTypeEnum.ACCESS_TOKEN);
+        String refreshToken = jwtUtil.generateToken(user, TokenTypeEnum.REFRESH_TOKEN);
 
         user.setRefreshToken(refreshToken);
         userRepository.save(user);
@@ -143,8 +142,8 @@ public class AuthServiceImpl implements AuthService {
         User existUser = userRepository.findByEmailAndRefreshToken(email, refreshToken)
                 .orElseThrow(() -> new RefreshTokenInvalidException("Refresh token is not valid"));
 
-        String accessToken = jwtUtil.generateToken(existUser, TokenType.ACCESS_TOKEN);
-        String newRefreshToken = jwtUtil.generateToken(existUser, TokenType.REFRESH_TOKEN);
+        String accessToken = jwtUtil.generateToken(existUser, TokenTypeEnum.ACCESS_TOKEN);
+        String newRefreshToken = jwtUtil.generateToken(existUser, TokenTypeEnum.REFRESH_TOKEN);
 
         existUser.setRefreshToken(newRefreshToken);
         userRepository.save(existUser);

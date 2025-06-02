@@ -2,7 +2,7 @@ package com.kenn.social_network.dto.response.post;
 
 import com.kenn.social_network.dto.response.comment.CommentResponse;
 import com.kenn.social_network.dto.response.user.UserInfoResponse;
-import com.kenn.social_network.enums.MediaType;
+import com.kenn.social_network.enums.MediaTypeEnum;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,6 +39,6 @@ public class PostResponse {
 
         private String url;
 
-        private MediaType type;
+        private MediaTypeEnum type;
     }
 }

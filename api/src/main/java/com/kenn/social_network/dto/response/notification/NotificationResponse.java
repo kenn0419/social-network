@@ -1,6 +1,6 @@
 package com.kenn.social_network.dto.response.notification;
 
-import com.kenn.social_network.enums.NotificationType;
+import com.kenn.social_network.enums.NotificationTypeEnum;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -17,7 +17,7 @@ public class NotificationResponse {
 
     private boolean isRead;
 
-    private NotificationType type;
+    private NotificationTypeEnum type;
 
     private String senderName;
 

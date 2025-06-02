@@ -9,9 +9,9 @@ import com.kenn.social_network.dto.request.user.UserUpdateRequest;
 import com.kenn.social_network.dto.response.page.PageResponse;
 import com.kenn.social_network.dto.response.post.PostResponse;
 import com.kenn.social_network.dto.response.user.UserResponse;
-import com.kenn.social_network.enums.FriendshipStatus;
+import com.kenn.social_network.enums.FriendshipStatusEnum;
 import com.kenn.social_network.enums.RoleEnum;
-import com.kenn.social_network.enums.UserStatus;
+import com.kenn.social_network.enums.UserStatusEnum;
 import com.kenn.social_network.exception.EmailAlreadyExistsException;
 import com.kenn.social_network.exception.IdNotFoundException;
 import com.kenn.social_network.exception.UserNotFoundException;
@@ -29,7 +29,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -90,7 +89,7 @@ public class UserServiceImpl implements UserService {
         List<Long> userIds = users.stream().map(User::getId).toList();
 
         List<Friendship> friendships = friendShipRepository.findFriendshipsBetweenUserAndOthers(currentUser.getId(), userIds);
-        Map<Long, FriendshipStatus> friendshipStatusMap = new HashMap<>();
+        Map<Long, FriendshipStatusEnum> friendshipStatusMap = new HashMap<>();
         for (Friendship f : friendships) {
             Long otherUserId = f.getRequester().getId().equals(currentUser.getId())
                     ? f.getAddressee().getId()
@@ -99,8 +98,8 @@ public class UserServiceImpl implements UserService {
         }
         List<UserResponse> userResponses = users.stream().map(convertUtil::toUserResponse).toList();
         userResponses.forEach(item -> {
-            FriendshipStatus status = friendshipStatusMap.getOrDefault(item.getId(), null);
-            item.setFriendshipStatus(status);
+            FriendshipStatusEnum status = friendshipStatusMap.getOrDefault(item.getId(), null);
+            item.setFriendshipStatusEnum(status);
         });
         return PageResponse.<List<UserResponse>>builder()
                 .pageNo(pageNo)
@@ -132,9 +131,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse changeStatusUser(long userId, UserStatus userStatus) {
+    public UserResponse changeStatusUser(long userId, UserStatusEnum userStatusEnum) {
         User updateUser = getUserById(userId);
-        updateUser.setStatus(userStatus);
+        updateUser.setStatus(userStatusEnum);
         userRepository.save(updateUser);
 
         return convertUtil.toUserResponse(updateUser);

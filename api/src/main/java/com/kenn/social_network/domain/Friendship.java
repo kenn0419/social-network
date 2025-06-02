@@ -1,6 +1,6 @@
 package com.kenn.social_network.domain;
 
-import com.kenn.social_network.enums.FriendshipStatus;
+import com.kenn.social_network.enums.FriendshipStatusEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,5 +23,5 @@ public class Friendship extends BaseEntity{
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private FriendshipStatus status;
+    private FriendshipStatusEnum status;
 }

@@ -1,7 +1,7 @@
 package com.kenn.social_network.dto.response.friend_ship;
 
 import com.kenn.social_network.dto.response.user.UserResponse;
-import com.kenn.social_network.enums.FriendshipStatus;
+import com.kenn.social_network.enums.FriendshipStatusEnum;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,5 +13,5 @@ public class FriendShipResponse {
 
     private UserResponse addressee;
 
-    private FriendshipStatus friendshipStatus;
+    private FriendshipStatusEnum friendshipStatusEnum;
 }

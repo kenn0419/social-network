@@ -2,7 +2,7 @@ package com.kenn.social_network.repository;
 
 import com.kenn.social_network.domain.Friendship;
 import com.kenn.social_network.domain.User;
-import com.kenn.social_network.enums.FriendshipStatus;
+import com.kenn.social_network.enums.FriendshipStatusEnum;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -58,5 +58,5 @@ public interface FriendShipRepository extends JpaRepository<Friendship, Long> {
 
     Optional<Friendship> findByRequesterAndAddressee(User requester, User addressee);
 
-    List<Friendship> findAllByAddresseeAndStatus(User addressee, FriendshipStatus friendshipStatus, Sort sort);
+    List<Friendship> findAllByAddresseeAndStatus(User addressee, FriendshipStatusEnum friendshipStatusEnum, Sort sort);
 }

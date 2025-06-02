@@ -1,6 +1,6 @@
-import { Form, Input, Button, Card, message } from "antd";
+import { Form, Input, Button, Card, message, notification } from "antd";
 import { FaUser, FaLock, FaGoogle, FaGithub } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   loginFailure,
   loginStart,
@@ -8,9 +8,12 @@ import {
 } from "../store/slices/authSlice";
 import authService from "../services/authService";
 import { useAppDispatch, useAppSelector } from "../store";
+import { useEffect } from "react";
 
 const Login: React.FC = () => {
   const dispatch = useAppDispatch();
+  const [searchParams] = useSearchParams();
+  const error = searchParams.get("error");
   const navigate = useNavigate();
   const { loading } = useAppSelector((state) => state.auth);
 
@@ -30,14 +33,37 @@ const Login: React.FC = () => {
       message.error(error?.response?.data?.message || "Đăng nhập thất bại!");
     }
   };
+  const showPopupLogin = (type: string) => {
+    const width = 500;
+    const height = 600;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+    const loginURL = `${
+      import.meta.env.VITE_BACKEND_URL
+    }/oauth2/authorization/${type}`;
 
+    window.open(
+      loginURL,
+      "_blank",
+      `width=${width},height=${height},top=${top},left=${left}`
+    );
+  };
   const handleGoogleLogin = () => {
-    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
+    showPopupLogin("google");
   };
 
   const handleGithubLogin = () => {
-    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/github`;
+    showPopupLogin("github");
   };
+
+  useEffect(() => {
+    if (error) {
+      notification.error({
+        message: "Authentication Error",
+        description: error,
+      });
+    }
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-blue-200">

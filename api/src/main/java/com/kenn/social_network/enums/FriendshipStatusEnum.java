@@ -1,6 +1,6 @@
 package com.kenn.social_network.enums;
 
-public enum FriendshipStatus {
+public enum FriendshipStatusEnum {
     PENDING,
     ACCEPTED
 }

@@ -4,7 +4,7 @@ import com.kenn.social_network.domain.Permission;
 import com.kenn.social_network.domain.Role;
 import com.kenn.social_network.domain.User;
 import com.kenn.social_network.enums.MethodEnum;
-import com.kenn.social_network.enums.UserStatus;
+import com.kenn.social_network.enums.UserStatusEnum;
 import com.kenn.social_network.repository.PermissionRepository;
 import com.kenn.social_network.repository.RoleRepository;
 import com.kenn.social_network.repository.UserRepository;
@@ -139,7 +139,7 @@ public class DatabaseInitializer implements CommandLineRunner {
             adminUser.setFirstName("Boss");
             adminUser.setLastName("Admin");
             adminUser.setPassword(passwordEncoder.encode("123123az"));
-            adminUser.setStatus(UserStatus.ACTIVE);
+            adminUser.setStatus(UserStatusEnum.ACTIVE);
 
             Role adminRole = this.roleRepository.findByName("ADMIN");
             if (adminRole != null) {

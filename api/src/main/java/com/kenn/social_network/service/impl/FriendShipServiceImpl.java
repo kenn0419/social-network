@@ -1,16 +1,15 @@
 package com.kenn.social_network.service.impl;
 
 import com.kenn.social_network.domain.Friendship;
-import com.kenn.social_network.domain.Notification;
 import com.kenn.social_network.domain.User;
 import com.kenn.social_network.domain.UserPresence;
 import com.kenn.social_network.dto.request.friend_ship.FriendShipRequest;
 import com.kenn.social_network.dto.response.friend_ship.FriendShipResponse;
 import com.kenn.social_network.dto.response.user.FriendWithStatusResponse;
 import com.kenn.social_network.dto.response.user.UserResponse;
-import com.kenn.social_network.enums.FriendShipActionStatus;
-import com.kenn.social_network.enums.FriendshipStatus;
-import com.kenn.social_network.enums.NotificationType;
+import com.kenn.social_network.enums.FriendShipActionStatusEnum;
+import com.kenn.social_network.enums.FriendshipStatusEnum;
+import com.kenn.social_network.enums.NotificationTypeEnum;
 import com.kenn.social_network.exception.FriendShipNotFoundException;
 import com.kenn.social_network.exception.UserNotFoundException;
 import com.kenn.social_network.repository.FriendShipRepository;
@@ -45,7 +44,7 @@ public class FriendShipServiceImpl implements FriendShipService {
 
     @Override
     public List<FriendShipResponse> fetchAllFriendShipRequest() {
-        return fetchAllFriendShips(FriendshipStatus.PENDING);
+        return fetchAllFriendShips(FriendshipStatusEnum.PENDING);
     }
 
     @Override
@@ -72,16 +71,16 @@ public class FriendShipServiceImpl implements FriendShipService {
         Friendship friendShip = friendShipRepository.findByRequesterAndAddressee(requester, currentUser)
                 .orElseThrow(() -> new FriendShipNotFoundException("Friendship not found"));
 
-        if (friendShip.getStatus() != FriendshipStatus.PENDING) {
+        if (friendShip.getStatus() != FriendshipStatusEnum.PENDING) {
             throw new IllegalStateException("Friendship is not in pending state");
         }
 
-        if (friendShipRequest.getFriendShipActionStatus() == FriendShipActionStatus.ACCEPT) {
-            friendShip.setStatus(FriendshipStatus.ACCEPTED);
+        if (friendShipRequest.getFriendShipActionStatus() == FriendShipActionStatusEnum.ACCEPT) {
+            friendShip.setStatus(FriendshipStatusEnum.ACCEPTED);
             friendShipRepository.save(friendShip);
-            notificationService.respondFriendRequestNotification(currentUser, requester, NotificationType.FRIEND_ACCEPT);
+            notificationService.respondFriendRequestNotification(currentUser, requester, NotificationTypeEnum.FRIEND_ACCEPT);
             notificationRepository.deleteBySenderAndReceiver(requester.getId(), currentUser.getId());
-        }else if (friendShipRequest.getFriendShipActionStatus() == FriendShipActionStatus.REJECT) {
+        }else if (friendShipRequest.getFriendShipActionStatus() == FriendShipActionStatusEnum.REJECT) {
             friendShipRepository.delete(friendShip);
         }
     }
@@ -123,14 +122,14 @@ public class FriendShipServiceImpl implements FriendShipService {
             Friendship newFriendship = Friendship.builder()
                     .requester(currentUser)
                     .addressee(addressee)
-                    .status(FriendshipStatus.PENDING)
+                    .status(FriendshipStatusEnum.PENDING)
                     .build();
             friendShipRepository.save(newFriendship);
-            notificationService.respondFriendRequestNotification(currentUser, addressee, NotificationType.FRIEND_REQUEST);
+            notificationService.respondFriendRequestNotification(currentUser, addressee, NotificationTypeEnum.FRIEND_REQUEST);
         }
     }
 
-    private List<FriendShipResponse> fetchAllFriendShips(FriendshipStatus status) {
+    private List<FriendShipResponse> fetchAllFriendShips(FriendshipStatusEnum status) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -147,7 +146,7 @@ public class FriendShipServiceImpl implements FriendShipService {
             return FriendShipResponse.builder()
                     .requester(requesterResponse)
                     .addressee(addresseeResponse)
-                    .friendshipStatus(friendship.getStatus())
+                    .friendshipStatusEnum(friendship.getStatus())
                     .build();
         }).toList();
     }

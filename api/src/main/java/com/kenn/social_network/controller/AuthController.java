@@ -20,8 +20,8 @@ import java.util.Map;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    @Value("${fe.link}")
-    private String FE_LINK;
+    @Value("${fe.verify-success}")
+    private String FE_LINK_VERIFY_SUCCESS;
 
     private final AuthService authService;
 
@@ -38,7 +38,7 @@ public class AuthController {
     @GetMapping("/verify-account/{token}")
     SuccessResponse<Void> verifyAccount(@PathVariable("token") String token, HttpServletResponse response) throws IOException {
         authService.verifyAccount(token);
-        response.sendRedirect(FE_LINK);
+        response.sendRedirect(FE_LINK_VERIFY_SUCCESS);
         return SuccessResponse.<Void>builder()
                 .statusCode(HttpStatus.OK.value())
                 .message("Verify successfully. You have accessed your account!!!")

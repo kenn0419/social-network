@@ -7,7 +7,7 @@ import com.kenn.social_network.dto.response.page.PageResponse;
 import com.kenn.social_network.dto.response.success.SuccessResponse;
 import com.kenn.social_network.dto.response.user.FriendWithStatusResponse;
 import com.kenn.social_network.dto.response.user.UserResponse;
-import com.kenn.social_network.enums.UserStatus;
+import com.kenn.social_network.enums.UserStatusEnum;
 import com.kenn.social_network.service.FriendShipService;
 import com.kenn.social_network.service.UserService;
 import com.kenn.social_network.util.MessageUtil;
@@ -70,12 +70,12 @@ public class UserController {
     @PatchMapping("/{id}")
     SuccessResponse<UserResponse> changeStatusUser(
             @PathVariable("id") long id,
-            @RequestParam("status") UserStatus userStatus
+            @RequestParam("status") UserStatusEnum userStatusEnum
     ) {
         return SuccessResponse.<UserResponse>builder()
                 .statusCode(HttpStatus.ACCEPTED.value())
                 .message(messageUtil.get("user.update.message"))
-                .data(userService.changeStatusUser(id, userStatus))
+                .data(userService.changeStatusUser(id, userStatusEnum))
                 .build();
     }
 

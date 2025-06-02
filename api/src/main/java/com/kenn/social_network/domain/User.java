@@ -1,6 +1,7 @@
 package com.kenn.social_network.domain;
 
-import com.kenn.social_network.enums.UserStatus;
+import com.kenn.social_network.enums.Oauth2ProviderEnum;
+import com.kenn.social_network.enums.UserStatusEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,13 +45,17 @@ public class User extends BaseEntity {
     @Column(name = "refresh_token", columnDefinition = "MEDIUMTEXT")
     private String refreshToken;
 
+    @Column(name = "provider")
+    @Enumerated(EnumType.STRING)
+    private Oauth2ProviderEnum provider;
+
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
 
     @Column(name = "user_status")
     @Enumerated(EnumType.STRING)
-    private UserStatus status;
+    private UserStatusEnum status;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();

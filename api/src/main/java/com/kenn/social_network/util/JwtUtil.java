@@ -2,7 +2,7 @@ package com.kenn.social_network.util;
 
 import com.kenn.social_network.domain.User;
 import com.kenn.social_network.dto.response.auth.UserToken;
-import com.kenn.social_network.enums.TokenType;
+import com.kenn.social_network.enums.TokenTypeEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -33,7 +33,7 @@ public class JwtUtil {
 
     private final JwtEncoder jwtEncoder;
 
-    public String generateToken(User user, TokenType tokenType) {
+    public String generateToken(User user, TokenTypeEnum tokenTypeEnum) {
         UserToken userToken = UserToken.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -41,7 +41,7 @@ public class JwtUtil {
                 .build();
 
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
-        long duration = tokenType == TokenType.ACCESS_TOKEN ? accessTokenDuration : refreshTokenDuration;
+        long duration = tokenTypeEnum == TokenTypeEnum.ACCESS_TOKEN ? accessTokenDuration : refreshTokenDuration;
         Instant now = Instant.now();
         Instant validity = now.plus(duration, ChronoUnit.SECONDS);
 

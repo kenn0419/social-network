@@ -1,6 +1,7 @@
-package com.kenn.social_network.service;
+package com.kenn.social_network.security;
 
-import com.kenn.social_network.enums.UserStatus;
+import com.kenn.social_network.enums.RoleEnum;
+import com.kenn.social_network.enums.UserStatusEnum;
 import com.kenn.social_network.exception.AccountBlockException;
 import com.kenn.social_network.repository.UserRepository;
 import com.kenn.social_network.util.MessageUtil;
@@ -12,7 +13,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.Collections;
 
 @Service("userDetailsService")
@@ -26,13 +26,20 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         com.kenn.social_network.domain.User existUser = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        if (existUser.getStatus() == UserStatus.BLOCK) {
+        if (existUser.getStatus() == UserStatusEnum.BLOCK) {
             throw new AccountBlockException(messageUtil.get("user.is-block"));
         }
-        return new User(
-            existUser.getEmail(),
-            existUser.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + existUser.getRole().getName()))
-        );
+
+        return toCustomUserDetails(existUser);
+    }
+
+    private CustomUserDetails toCustomUserDetails(com.kenn.social_network.domain.User user) {
+        return CustomUserDetails.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName())))
+                .build();
     }
 }

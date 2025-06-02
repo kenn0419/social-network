@@ -9,7 +9,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Client, IMessage } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import dayjs from "dayjs";
-import socketService from "../../services/socketService";
+import callService from "../../services/callService";
 import { v4 as uuidv4 } from "uuid";
 
 const Chat = ({
@@ -47,21 +47,36 @@ const Chat = ({
     }
   };
 
-  const handleStartCall = () => {
-    const stompClient = socketService.connect();
-    console.log(stompClient);
-    if (stompClient && stompClient.connected && receiver && currentUser) {
+  // components/chat/Chat.tsx (phần gọi điện)
+  const handleStartCall = async () => {
+    try {
+      // Kiểm tra quyền truy cập trước
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+      stream.getTracks().forEach((track) => track.stop());
+
+      // Khởi tạo kết nối WebSocket cho cuộc gọi
+      const client = await callService.initCallConnection(
+        currentUser.id.toString()
+      );
+
       const newCallId = uuidv4();
-      stompClient.publish({
+      client.publish({
         destination: "/app/call.initiate",
         body: JSON.stringify({
           receiverId: receiver.id,
           callId: newCallId,
+          callerName: `${currentUser.firstName} ${currentUser.lastName}`,
         }),
       });
-      navigate(`/call/${newCallId}?callerId=${currentUser.id}&initiator=true`);
-    } else {
-      message.error("Không thể bắt dầu cuộc gọi.");
+
+      // Chuyển hướng sau khi đã publish thành công
+      navigate(`/call/${newCallId}?receiverId=${receiver.id}&initiator=true`);
+    } catch (error) {
+      console.error("Failed to start call:", error);
+      message.error("Không thể bắt đầu cuộc gọi");
     }
   };
 

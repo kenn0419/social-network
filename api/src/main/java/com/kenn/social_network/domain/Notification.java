@@ -1,6 +1,6 @@
 package com.kenn.social_network.domain;
 
-import com.kenn.social_network.enums.NotificationType;
+import com.kenn.social_network.enums.NotificationTypeEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,5 +32,5 @@ public class Notification extends BaseEntity{
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    private NotificationType type;
+    private NotificationTypeEnum type;
 }

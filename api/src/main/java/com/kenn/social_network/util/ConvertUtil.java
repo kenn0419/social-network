@@ -6,19 +6,16 @@ import com.kenn.social_network.dto.request.user.UserCreationRequest;
 import com.kenn.social_network.dto.request.user.UserUpdateRequest;
 import com.kenn.social_network.dto.response.auth.AuthResponse;
 import com.kenn.social_network.dto.response.comment.CommentResponse;
-import com.kenn.social_network.dto.response.friend_ship.FriendShipResponse;
 import com.kenn.social_network.dto.response.message.MessageResponse;
 import com.kenn.social_network.dto.response.post.PostResponse;
 import com.kenn.social_network.dto.response.user.UserInfoResponse;
 import com.kenn.social_network.dto.response.user.UserResponse;
-import com.kenn.social_network.enums.FriendshipStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component

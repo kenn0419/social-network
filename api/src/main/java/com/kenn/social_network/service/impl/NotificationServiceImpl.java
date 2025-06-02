@@ -3,7 +3,7 @@ package com.kenn.social_network.service.impl;
 import com.kenn.social_network.domain.Notification;
 import com.kenn.social_network.domain.User;
 import com.kenn.social_network.dto.response.notification.NotificationResponse;
-import com.kenn.social_network.enums.NotificationType;
+import com.kenn.social_network.enums.NotificationTypeEnum;
 import com.kenn.social_network.exception.AuthorizationException;
 import com.kenn.social_network.exception.NotificationNotFoundException;
 import com.kenn.social_network.repository.NotificationRepository;
@@ -26,16 +26,16 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
 
     @Override
-    public void respondFriendRequestNotification(User sender, User receiver, NotificationType notificationType) {
+    public void respondFriendRequestNotification(User sender, User receiver, NotificationTypeEnum notificationTypeEnum) {
         Notification notification = Notification.builder()
                 .sender(sender)
                 .receiver(receiver)
                 .url("/profile/" + sender.getId())
                 .isRead(false)
-                .type(notificationType)
+                .type(notificationTypeEnum)
                 .build();
 
-        if (notificationType == NotificationType.FRIEND_REQUEST) {
+        if (notificationTypeEnum == NotificationTypeEnum.FRIEND_REQUEST) {
             notification.setContent(sender.getFirstName() + " " + sender.getLastName() + " sent a friend request.");
         }else {
             notification.setContent(sender.getFirstName() + " " + sender.getLastName() + " accept your friend request.");

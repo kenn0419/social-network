@@ -1,6 +1,6 @@
 package com.kenn.social_network.enums;
 
-public enum NotificationType {
+public enum NotificationTypeEnum {
     LIKE,
     COMMENT,
     POST_TAG,

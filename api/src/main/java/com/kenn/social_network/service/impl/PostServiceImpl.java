@@ -8,7 +8,7 @@ import com.kenn.social_network.dto.request.post.PostCreationRequest;
 import com.kenn.social_network.dto.response.page.PageResponse;
 import com.kenn.social_network.dto.response.post.PostResponse;
 import com.kenn.social_network.dto.response.user.UserInfoResponse;
-import com.kenn.social_network.enums.MediaType;
+import com.kenn.social_network.enums.MediaTypeEnum;
 import com.kenn.social_network.exception.AuthorizationException;
 import com.kenn.social_network.exception.PostNotFoundException;
 import com.kenn.social_network.exception.UserNotFoundException;
@@ -57,12 +57,12 @@ public class PostServiceImpl implements PostService {
 
         List<PostMedia> mediaList = postCreationRequest.getMediaFiles().stream().map(item -> {
             String mediaUrl = null;
-            MediaType mediaType = null;
+            MediaTypeEnum mediaTypeEnum = null;
             if (item.getContentType() != null && item.getContentType().startsWith("image/")) {
                 try {
                     Map imageResult = cloudinaryService.uploadFile(item, "social-network/post/image");
                     mediaUrl = (String) imageResult.get("secure_url");
-                    mediaType = MediaType.IMAGE;
+                    mediaTypeEnum = MediaTypeEnum.IMAGE;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -70,7 +70,7 @@ public class PostServiceImpl implements PostService {
                 try {
                     Map videoResult = cloudinaryService.uploadVideo(item, "social-network/post/video");
                     mediaUrl = (String) videoResult.get("secure_url");
-                    mediaType = MediaType.VIDEO;
+                    mediaTypeEnum = MediaTypeEnum.VIDEO;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -79,7 +79,7 @@ public class PostServiceImpl implements PostService {
 
             return PostMedia.builder()
                     .url(mediaUrl)
-                    .type(mediaType)
+                    .type(mediaTypeEnum)
                     .post(newPost)
                     .build();
         }).toList();

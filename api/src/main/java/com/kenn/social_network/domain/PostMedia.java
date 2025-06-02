@@ -1,7 +1,6 @@
 package com.kenn.social_network.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.kenn.social_network.enums.MediaType;
+import com.kenn.social_network.enums.MediaTypeEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +20,7 @@ public class PostMedia extends BaseEntity{
 
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
-    private MediaType type;
+    private MediaTypeEnum type;
 
     @ManyToOne
     @JoinColumn(name = "post_id")

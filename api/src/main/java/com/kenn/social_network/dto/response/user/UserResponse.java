@@ -1,6 +1,6 @@
 package com.kenn.social_network.dto.response.user;
 
-import com.kenn.social_network.enums.FriendshipStatus;
+import com.kenn.social_network.enums.FriendshipStatusEnum;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,5 +25,5 @@ public class UserResponse {
 
     private String bio;
 
-    private FriendshipStatus friendshipStatus;
+    private FriendshipStatusEnum friendshipStatusEnum;
 }
