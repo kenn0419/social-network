@@ -12,6 +12,7 @@ import com.kenn.social_network.exception.EmailAlreadyExistsException;
 import com.kenn.social_network.exception.ExpiredTokenVerifyAccountException;
 import com.kenn.social_network.exception.RefreshTokenInvalidException;
 import com.kenn.social_network.exception.UserNotFoundException;
+import com.kenn.social_network.mapper.UserMapper;
 import com.kenn.social_network.repository.RoleRepository;
 import com.kenn.social_network.repository.UserRepository;
 import com.kenn.social_network.service.AuthService;
@@ -41,7 +42,7 @@ public class AuthServiceImpl implements AuthService {
     @Value("${jwt.refresh-token-duration}")
     private long refreshTokenDuration;
 
-    private final ConvertUtil convertUtil;
+    private final UserMapper userMapper;
     private final MessageUtil messageUtil;
     private final RedisUtil redisUtil;
     private final MailUtil mailUtil;
@@ -58,7 +59,7 @@ public class AuthServiceImpl implements AuthService {
             throw new EmailAlreadyExistsException(messageUtil.get("email.exists"));
         }
 
-        User registerUser = convertUtil.toUser(authRegisterRequest);
+        User registerUser = userMapper.toUser(authRegisterRequest);
         String token = UUID.randomUUID().toString();
         redisUtil.saveVerificationToken(token, registerUser);
 
@@ -115,7 +116,7 @@ public class AuthServiceImpl implements AuthService {
         cookie.setMaxAge((int) refreshTokenDuration);
 
         AuthResponse authResponse = AuthResponse.builder()
-                .user(convertUtil.toAuthResponseUser(user))
+                .user(userMapper.toAuthResponseUser(user))
                 .accessToken(accessToken)
                 .build();
 
@@ -132,7 +133,7 @@ public class AuthServiceImpl implements AuthService {
         User currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        return convertUtil.toAuthResponseUser(currentUser);
+        return userMapper.toAuthResponseUser(currentUser);
     }
 
     @Override
@@ -156,7 +157,7 @@ public class AuthServiceImpl implements AuthService {
         cookie.setMaxAge((int) refreshTokenDuration);
 
         AuthResponse authResponse = AuthResponse.builder()
-                .user(convertUtil.toAuthResponseUser(existUser))
+                .user(userMapper.toAuthResponseUser(existUser))
                 .accessToken(accessToken)
                 .build();
 

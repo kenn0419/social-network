@@ -141,3 +141,30 @@ export interface ConversationResponse {
   lastMessageTime: string;
   unreadCount: number;
 }
+
+export interface GroupResponse {
+  id: number;
+  name: string;
+  description: string;
+  groupStatus: string;
+  owner: UserResponse;
+  coverImageUrl: string;
+  members: UserResponse[];
+  posts: PostResponse[];
+  createdAt: string;
+}
+
+export interface PageResponse<T> {
+  pageNo: number;
+  pageSize: 10;
+  totalPage: 0;
+  data: T;
+}
+
+export interface GroupCreationRequest {
+  name: string;
+  description: string;
+  groupStatus: string;
+  memberIds?: number[];
+  coverImage?: File;
+}

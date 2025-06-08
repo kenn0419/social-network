@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { User } from "../../services/userService";
 import authService from "../../services/authService";
+import { UserResponse } from "../../types/api";
 
 interface AuthState {
-  user: User | null;
+  user: UserResponse | null;
   token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
@@ -33,7 +33,7 @@ const authSlice = createSlice({
     },
     loginSuccess: (
       state,
-      action: PayloadAction<{ user: User; accessToken: string }>
+      action: PayloadAction<{ user: UserResponse; accessToken: string }>
     ) => {
       state.user = action.payload.user;
       state.token = action.payload.accessToken;

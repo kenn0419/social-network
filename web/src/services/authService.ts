@@ -1,4 +1,4 @@
-import axiosInstance from "../axios-customize";
+import axiosInstance from "../axios_customize";
 import { LoginRequest, RegisterRequest, AuthResponse } from "../types/api";
 
 const authService = {

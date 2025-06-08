@@ -21,7 +21,7 @@ public class ChatGroup extends BaseEntity {
     @ManyToMany
     @JoinTable(
             name = "chat_group_members",
-            joinColumns = @JoinColumn(name = "group_id"),
+            joinColumns = @JoinColumn(name = "chat_group_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> members = new ArrayList<>();

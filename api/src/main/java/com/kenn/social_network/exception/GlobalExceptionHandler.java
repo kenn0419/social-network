@@ -47,7 +47,8 @@ public class GlobalExceptionHandler {
             AuthorizationException.class,
             PostNotFoundException.class,
             CommentNotFoundException.class,
-            RefreshTokenInvalidException.class
+            RefreshTokenInvalidException.class,
+            GroupNotFoundException.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ErrorResponse<String> handleExpiredTokenVerifyAccount(Exception e, HttpServletRequest request) {

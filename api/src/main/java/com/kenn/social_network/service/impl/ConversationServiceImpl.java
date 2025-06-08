@@ -3,10 +3,11 @@ package com.kenn.social_network.service.impl;
 import com.kenn.social_network.domain.Message;
 import com.kenn.social_network.domain.User;
 import com.kenn.social_network.dto.response.message.ConversationResponse;
+import com.kenn.social_network.mapper.MessageMapper;
+import com.kenn.social_network.mapper.UserMapper;
 import com.kenn.social_network.repository.MessageRepository;
 import com.kenn.social_network.repository.UserRepository;
 import com.kenn.social_network.service.ConversationService;
-import com.kenn.social_network.util.ConvertUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -20,7 +21,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ConversationServiceImpl implements ConversationService {
-    private final ConvertUtil convertUtil;
+    private final UserMapper userMapper;
+    private final MessageMapper messageMapper;
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
 
@@ -57,8 +59,8 @@ public class ConversationServiceImpl implements ConversationService {
 
                     return ConversationResponse.builder()
                             .id(msg.getId())
-                            .participant(convertUtil.toUserResponse(participant))
-                            .lastMessage(convertUtil.toMessageResponse(msg))
+                            .participant(userMapper.toUserResponse(participant))
+                            .lastMessage(messageMapper.toMessageResponse(msg))
                             .lastMessageTime(msg.getCreatedAt())
                             .unRead(!msg.getSender().getId().equals(currentUser.getId()) && !msg.isUnRead())
                             .build();

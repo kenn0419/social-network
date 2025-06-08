@@ -45,8 +45,13 @@ public class UserPresenceServiceImpl implements UserPresenceService {
         log.info("Saved user presence to database: {}", userPresence);
         
         String key = "user:presence:" + userId;
-        redisTemplate.opsForValue().set(key, userPresence, PRESENCE_EXPIRATION);
-        log.info("Saved user presence to Redis with key {} and expiration {}", key, PRESENCE_EXPIRATION);
+        try {
+            redisTemplate.opsForValue().set(key, userPresence, PRESENCE_EXPIRATION);
+            log.info("Saved user presence to Redis with key {} and expiration {}", key, PRESENCE_EXPIRATION);
+        } catch (Exception e) {
+            log.error("Failed to save user presence to Redis", e);
+        }
+
 
         // Broadcast status update
         messagingTemplate.convertAndSend("/topic/status", userPresence);

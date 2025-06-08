@@ -1,14 +1,20 @@
-import axiosInstance from "../axios-customize";
+import axiosInstance from "../axios_customize";
 import { PostResponse, CreatePostRequest, CommentResponse } from "../types/api";
 
 const postService = {
-  async getPosts(userId: number): Promise<PostResponse[]> {
+  async getAllPersonalPosts(userId: number): Promise<PostResponse[]> {
     const response = await axiosInstance.get<PostResponse[]>(
       `/api/v1/posts/current/${userId}`
     );
     return response.data;
   },
+  async getAllGroupPosts(groupId: number): Promise<PostResponse[]> {
+    const response = await axiosInstance.get<PostResponse[]>(
+      `api/v1/posts/group/${groupId}`
+    );
 
+    return response.data;
+  },
   async createPost(data: CreatePostRequest): Promise<PostResponse> {
     const formData = new FormData();
     formData.append("content", data.content);

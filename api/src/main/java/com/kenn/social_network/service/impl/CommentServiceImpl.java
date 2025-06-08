@@ -7,11 +7,11 @@ import com.kenn.social_network.dto.request.comment.CommentRequest;
 import com.kenn.social_network.dto.response.comment.CommentResponse;
 import com.kenn.social_network.exception.CommentNotFoundException;
 import com.kenn.social_network.exception.PostNotFoundException;
+import com.kenn.social_network.mapper.CommentMapper;
 import com.kenn.social_network.repository.CommentRepository;
 import com.kenn.social_network.repository.PostRepository;
 import com.kenn.social_network.repository.UserRepository;
 import com.kenn.social_network.service.CommentService;
-import com.kenn.social_network.util.ConvertUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
-    private final ConvertUtil convertUtil;
+    private final CommentMapper commentMapper;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
@@ -52,19 +52,19 @@ public class CommentServiceImpl implements CommentService {
 
         commentRepository.save(comment);
 
-        return convertUtil.toCommentResponse(comment);
+        return commentMapper.toCommentResponse(comment);
     }
 
     @Override
     public List<CommentResponse> getCommentsByPost(long postId) {
         List<Comment> comments = commentRepository.findByPostIdAndParentCommentIsNullOrderByCreatedAtDesc(postId);
-        return comments.stream().map(convertUtil::toCommentResponse).toList();
+        return comments.stream().map(commentMapper::toCommentResponse).toList();
     }
 
     @Override
     public List<CommentResponse> getRepliesByCommentId(long parentCommentId) {
         List<Comment> replies = commentRepository.findByParentCommentId(parentCommentId);
 
-        return replies.stream().map(convertUtil::toCommentResponse).toList();
+        return replies.stream().map(commentMapper::toCommentResponse).toList();
     }
 }

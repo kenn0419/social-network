@@ -1,21 +1,20 @@
 package com.kenn.social_network.service.impl;
 
-import com.kenn.social_network.domain.Like;
-import com.kenn.social_network.domain.Post;
-import com.kenn.social_network.domain.PostMedia;
-import com.kenn.social_network.domain.User;
+import com.kenn.social_network.domain.*;
 import com.kenn.social_network.dto.request.post.PostCreationRequest;
 import com.kenn.social_network.dto.response.page.PageResponse;
 import com.kenn.social_network.dto.response.post.PostResponse;
 import com.kenn.social_network.dto.response.user.UserInfoResponse;
 import com.kenn.social_network.enums.MediaTypeEnum;
+import com.kenn.social_network.enums.PostTypeEnum;
 import com.kenn.social_network.exception.AuthorizationException;
+import com.kenn.social_network.exception.GroupNotFoundException;
 import com.kenn.social_network.exception.PostNotFoundException;
 import com.kenn.social_network.exception.UserNotFoundException;
+import com.kenn.social_network.mapper.PostMapper;
 import com.kenn.social_network.repository.*;
 import com.kenn.social_network.service.CloudinaryService;
 import com.kenn.social_network.service.PostService;
-import com.kenn.social_network.util.ConvertUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,23 +24,21 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
 
-    private final ConvertUtil convertUtil;
+    private final PostMapper postMapper;
     private final CloudinaryService cloudinaryService;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final LikeRepository likeRepository;
-    private final CommentRepository commentRepository;
+    private final GroupRepository groupRepository;
     private final FriendShipRepository friendShipRepository;
 
     @Override
@@ -49,33 +46,27 @@ public class PostServiceImpl implements PostService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
+        Group existGroup = postCreationRequest.getGroupId() != null ?
+                groupRepository.findById(postCreationRequest.getGroupId())
+                        .orElseThrow(() -> new GroupNotFoundException("Group not found")) : null;
         Post newPost = Post.builder()
                 .content(postCreationRequest.getContent())
                 .user(currentUser)
+                .group(existGroup)
+                .postType(postCreationRequest.getGroupId() != null ? PostTypeEnum.GROUP : PostTypeEnum.PERSONAL)
                 .build();
 
         List<PostMedia> mediaList = postCreationRequest.getMediaFiles().stream().map(item -> {
-            String mediaUrl = null;
+            String mediaUrl = cloudinaryService.getFileUrl(item);
             MediaTypeEnum mediaTypeEnum = null;
-            if (item.getContentType() != null && item.getContentType().startsWith("image/")) {
-                try {
-                    Map imageResult = cloudinaryService.uploadFile(item, "social-network/post/image");
-                    mediaUrl = (String) imageResult.get("secure_url");
+            if (item != null && item.getContentType() != null) {
+                if (item.getContentType().startsWith("image/")) {
                     mediaTypeEnum = MediaTypeEnum.IMAGE;
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                try {
-                    Map videoResult = cloudinaryService.uploadVideo(item, "social-network/post/video");
-                    mediaUrl = (String) videoResult.get("secure_url");
+                } else if (item.getContentType().startsWith("video/")) {
                     mediaTypeEnum = MediaTypeEnum.VIDEO;
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
                 }
-
             }
+
 
             return PostMedia.builder()
                     .url(mediaUrl)
@@ -112,9 +103,6 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<PostResponse> getPostsByCurrentUser(long userId) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         List<Long> friendIds = friendShipRepository.findFriendIds(userId);
         friendIds.add(userId);
         int[] daysList = {7, 14, 30};
@@ -130,16 +118,13 @@ public class PostServiceImpl implements PostService {
             }
         }
 
-        return posts.stream().map(post -> convertUtil.toPostResponse(post, currentUser)).toList();
+        return posts.stream().map(postMapper::toPostResponse).toList();
     }
 
     @Override
     public PageResponse<List<PostResponse>> getPostsByUser(long userId, int pageNo, int pageSize) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         int page = pageNo;
         if (pageNo > 0) {
             page = pageNo - 1;
@@ -148,7 +133,7 @@ public class PostServiceImpl implements PostService {
         Page<Post> postPage = postRepository.findByUser(user, pageable);
 
         List<PostResponse> posts = postPage.getContent()
-                .stream().map(post -> convertUtil.toPostResponse(post, currentUser)).toList();
+                .stream().map(postMapper::toPostResponse).toList();
 
         return PageResponse.<List<PostResponse>>builder()
                 .pageNo(pageNo)
@@ -193,7 +178,7 @@ public class PostServiceImpl implements PostService {
         }
 
         int likeCount = likeRepository.countByPost(post);
-        PostResponse postResponse = convertUtil.toPostResponse(post, currentUser);
+        PostResponse postResponse = postMapper.toPostResponse(post);
         postResponse.setLikeCount(likeCount);
 
         return postResponse;

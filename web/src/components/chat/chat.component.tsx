@@ -137,7 +137,10 @@ const Chat = ({
       <div className="flex-1 flex flex-col relative bg-white rounded-xl shadow h-full">
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center p-4 bg-white rounded-t-xl">
-          <div className="relative">
+          <div
+            className="relative cursor-pointer"
+            onClick={() => navigate(`/profile/${receiver.id}`)}
+          >
             <Avatar
               src={receiver?.avatarUrl || undefined}
               size={40}
@@ -182,7 +185,7 @@ const Chat = ({
                   className={`rounded-2xl px-4 py-2 max-w-xs shadow-sm ${
                     isMe ? "bg-[#8b5cf6] text-white" : "bg-white text-gray-900"
                   }`}
-                  title={dayjs(msg.createdAt).format("HH:mm:ss-DD-MM-YYYY")}
+                  title={dayjs(msg.createdAt).format("HH:mm DD-MM-YYYY")}
                 >
                   {msg.content}
                 </span>

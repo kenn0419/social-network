@@ -5,7 +5,6 @@ import com.kenn.social_network.enums.TokenTypeEnum;
 import com.kenn.social_network.exception.UserNotFoundException;
 import com.kenn.social_network.repository.UserRepository;
 import com.kenn.social_network.security.CustomUserDetails;
-import com.kenn.social_network.util.ConvertUtil;
 import com.kenn.social_network.util.JwtUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.net.URI;
 
 @Component
 @RequiredArgsConstructor
@@ -32,7 +30,6 @@ public class CustomOauth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
     private long jwtRefreshTokenDuration;
 
     private final UserRepository userRepository;
-    private final ConvertUtil convertUtil;
     private final JwtUtil jwtUtil;
 
     @Override
@@ -61,7 +58,7 @@ public class CustomOauth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         cookie.setMaxAge((int) jwtRefreshTokenDuration);
         response.addCookie(cookie);
 
-        String targetUrl = UriComponentsBuilder.fromUriString(redirectUri + "#/oauth2/success")
+        String targetUrl = UriComponentsBuilder.fromUriString(redirectUri + "/oauth2/success")
                 .queryParam("token", accessToken)
                 .build()
                 .toUriString();

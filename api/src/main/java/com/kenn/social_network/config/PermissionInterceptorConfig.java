@@ -22,7 +22,7 @@
 //    @Override
 //    public void addInterceptors(InterceptorRegistry registry) {
 //        String[] whiteList = new String[] {
-//            "/api/v1/auth/verify-account/**", "/api/v1/auth/login", "/api/v1/auth/register"
+//            "/api/v1/auth/verify-account/**", "/api/v1/auth/login", "/api/v1/auth/register", "/oauth2/authorization/**"
 //        };
 //
 //        registry.addInterceptor(customPermissionInterceptor(userRepository)).excludePathPatterns(whiteList);

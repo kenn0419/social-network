@@ -29,6 +29,6 @@ public class Message extends BaseEntity{
     private boolean unRead;
 
     @ManyToOne
-    @JoinColumn(name = "group_id")
+    @JoinColumn(name = "chat_group_id")
     private ChatGroup chatGroup;
 }

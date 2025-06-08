@@ -21,9 +21,7 @@ public class UserPresenceScheduler {
 
     private final UserPresenceRepository userPresenceRepository;
     private final UserPresenceService userPresenceService;
-//    private final RedisTemplate<String, Object> redisTemplate;
 
-    // Chạy mỗi 5 phút
     @Scheduled(fixedRate = 180000)
     public void updateInactiveUsers() {
         try {
@@ -37,9 +35,11 @@ public class UserPresenceScheduler {
                 timestamp
             );
 
-            for (UserPresence user : inactiveUsers) {
-                userPresenceService.updateUserPresence(user.getUserId(), UserPresenceStatusEnum.AWAY);
-                log.info("Updated user {} status to AWAY", user.getUserId());
+            if (!inactiveUsers.isEmpty()) {
+                for (UserPresence user : inactiveUsers) {
+                    userPresenceService.updateUserPresence(user.getUserId(), UserPresenceStatusEnum.AWAY);
+                    log.info("Updated user {} status to AWAY", user.getUserId());
+                }
             }
 
             log.info("Completed scheduled task. Updated {} users to AWAY status", inactiveUsers.size());

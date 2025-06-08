@@ -1,4 +1,4 @@
-import axiosInstance from "../axios-customize";
+import axiosInstance from "../axios_customize";
 import { Notification } from "../store/slices/notificationSlice";
 import { NotificationResponse } from "../types/api";
 

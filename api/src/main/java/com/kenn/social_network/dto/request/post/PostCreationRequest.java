@@ -12,9 +12,10 @@ import java.util.List;
 @Setter
 public class PostCreationRequest {
 
+    private Long groupId;
+
     @NotNull(message = "Content can not be blank")
     private String content;
 
-    @NotNull(message = "Media files can not be null")
     private List<MultipartFile> mediaFiles;
 }

@@ -15,7 +15,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("""
                 SELECT p FROM Post p
-                WHERE p.user.id IN :ids AND p.createdAt >= :fromDate
+                WHERE p.user.id IN :ids AND p.createdAt >= :fromDate AND p.postType = PERSONAL
                 ORDER BY p.createdAt DESC
             """)
     List<Post> findRecentPostsOfUserAndFriends(@Param("ids") List<Long> ids, @Param("fromDate") LocalDateTime fromDate);

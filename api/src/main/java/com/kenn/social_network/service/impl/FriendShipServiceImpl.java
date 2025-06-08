@@ -12,13 +12,13 @@ import com.kenn.social_network.enums.FriendshipStatusEnum;
 import com.kenn.social_network.enums.NotificationTypeEnum;
 import com.kenn.social_network.exception.FriendShipNotFoundException;
 import com.kenn.social_network.exception.UserNotFoundException;
+import com.kenn.social_network.mapper.UserMapper;
 import com.kenn.social_network.repository.FriendShipRepository;
 import com.kenn.social_network.repository.NotificationRepository;
 import com.kenn.social_network.repository.UserRepository;
 import com.kenn.social_network.service.FriendShipService;
 import com.kenn.social_network.service.NotificationService;
 import com.kenn.social_network.service.UserPresenceService;
-import com.kenn.social_network.util.ConvertUtil;
 import com.kenn.social_network.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -35,7 +35,7 @@ import java.util.Optional;
 public class FriendShipServiceImpl implements FriendShipService {
 
     private final MessageUtil messageUtil;
-    private final ConvertUtil convertUtil;
+    private final UserMapper userMapper;
     private final NotificationService notificationService;
     private final UserPresenceService userPresenceService;
     private final UserRepository userRepository;
@@ -55,7 +55,7 @@ public class FriendShipServiceImpl implements FriendShipService {
         List<Friendship> friendships = friendShipRepository.findAllFriendships(currentUser.getId());
         return friendships.stream().map(item -> {
             User user = item.getRequester().getId().equals(currentUser.getId()) ? item.getAddressee() : item.getRequester();
-            return convertUtil.toUserResponse(user);
+            return userMapper.toUserResponse(user);
         }).toList();
     }
 
@@ -140,8 +140,8 @@ public class FriendShipServiceImpl implements FriendShipService {
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
         return friendships.stream().map(friendship -> {
-            UserResponse requesterResponse = convertUtil.toUserResponse(friendship.getRequester());
-            UserResponse addresseeResponse = convertUtil.toUserResponse(currentUser);
+            UserResponse requesterResponse = userMapper.toUserResponse(friendship.getRequester());
+            UserResponse addresseeResponse = userMapper.toUserResponse(currentUser);
 
             return FriendShipResponse.builder()
                     .requester(requesterResponse)

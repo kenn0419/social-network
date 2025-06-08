@@ -24,8 +24,6 @@ public interface FriendShipRepository extends JpaRepository<Friendship, Long> {
                     WHERE (f.requester.id = :userId OR f.addressee.id = :userId)
                       AND f.status = 'ACCEPTED'
                 )
-                AND (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                     OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :keyword, '%')))
             """)
     List<User> searchFriends(@Param("userId") Long userId, @Param("keyword") String keyword);
 

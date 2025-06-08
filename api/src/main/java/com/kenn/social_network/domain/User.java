@@ -57,6 +57,9 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserStatusEnum status;
 
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Group> groups = new ArrayList<>();
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 

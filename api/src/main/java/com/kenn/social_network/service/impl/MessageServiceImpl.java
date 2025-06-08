@@ -5,27 +5,26 @@ import com.kenn.social_network.domain.User;
 import com.kenn.social_network.dto.request.message.SendMessageRequest;
 import com.kenn.social_network.dto.response.message.MessageResponse;
 import com.kenn.social_network.exception.UserNotFoundException;
+import com.kenn.social_network.mapper.MessageMapper;
+import com.kenn.social_network.mapper.UserMapper;
 import com.kenn.social_network.repository.MessageRepository;
 import com.kenn.social_network.repository.UserRepository;
 import com.kenn.social_network.service.MessageService;
 import com.kenn.social_network.service.NotificationService;
-import com.kenn.social_network.util.ConvertUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
 
-    private final ConvertUtil convertUtil;
+    private final UserMapper userMapper;
+    private final MessageMapper messageMapper;
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
@@ -49,7 +48,7 @@ public class MessageServiceImpl implements MessageService {
 
         messageRepository.save(message);
 
-        MessageResponse response = convertUtil.toMessageResponse(message);
+        MessageResponse response = messageMapper.toMessageResponse(message);
 
         // Gửi realtime qua websocket cho receiver
         messagingTemplate.convertAndSendToUser(
@@ -73,8 +72,8 @@ public class MessageServiceImpl implements MessageService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         List<Message> messages = messageRepository.findChatBetween(currentUser.getId(), userId);
         return messages.stream().map(m -> MessageResponse.builder()
-                .sender(convertUtil.toUserResponse(m.getSender()))
-                .receiver(convertUtil.toUserResponse(m.getReceiver()))
+                .sender(userMapper.toUserResponse(m.getSender()))
+                .receiver(userMapper.toUserResponse(m.getReceiver()))
                 .content(m.getContent())
                 .createdAt(m.getCreatedAt())
                 .build()

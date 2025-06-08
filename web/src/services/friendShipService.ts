@@ -1,4 +1,4 @@
-import axiosInstance from "../axios-customize";
+import axiosInstance from "../axios_customize";
 import { FriendShipResponse } from "../types/api";
 
 const friendShipService = {

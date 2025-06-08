@@ -32,4 +32,34 @@ public class CloudinaryServiceImpl implements CloudinaryService {
                         "folder", folderName
                 ));
     }
+
+    @Override
+    public String getFileUrl(MultipartFile file) {
+        if (file != null) {
+            String contentType = file.getContentType();
+
+            if (contentType != null) {
+                if (contentType.startsWith("image/")) {
+                    Map avatarResult = null;
+                    try {
+                        avatarResult = uploadFile(file, "social-network/image");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return (String) avatarResult.get("secure_url");
+                } else if (contentType.startsWith("video/")) {
+                    Map avatarResult = null;
+                    try {
+                        avatarResult = uploadFile(file, "social-network/video");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return (String) avatarResult.get("secure_url");
+                } else {
+                    System.out.println("Không phải hình ảnh hay video");
+                }
+            }
+        }
+        return null;
+    }
 }
