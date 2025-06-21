@@ -12,5 +12,7 @@ public class PageResponse<T> {
 
     private int totalPages;
 
+    private long totalElements;
+
     private T data;
 }

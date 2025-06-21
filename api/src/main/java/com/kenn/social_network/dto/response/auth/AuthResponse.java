@@ -1,6 +1,7 @@
 package com.kenn.social_network.dto.response.auth;
 
 
+import com.kenn.social_network.enums.RoleEnum;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,5 +25,7 @@ public class AuthResponse {
         private String email;
 
         private String avatarUrl;
+
+        private String role;
     }
 }

@@ -3,7 +3,7 @@ import { UserResponse } from "../types/api";
 
 export interface FriendWithStatus {
   userResponse: UserResponse;
-  userPresenceStatus: "ONLINE" | "OFFLINE" | "AWAY" | "BUSY";
+  userPresenceStatus: string;
   lastActiveAt: string;
 }
 

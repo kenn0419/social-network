@@ -17,4 +17,6 @@ public interface UserPresenceRepository extends JpaRepository<UserPresence, Long
         UserPresenceStatusEnum status,
         Timestamp timestamp
     );
+
+    List<UserPresence> findAllByUserPresenceStatus(UserPresenceStatusEnum status);
 }

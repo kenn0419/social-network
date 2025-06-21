@@ -104,12 +104,13 @@ public class UserServiceImpl implements UserService {
         List<UserResponse> userResponses = users.stream().map(userMapper::toUserResponse).toList();
         userResponses.forEach(item -> {
             FriendshipStatusEnum status = friendshipStatusMap.getOrDefault(item.getId(), null);
-            item.setFriendshipStatusEnum(status);
+            item.setFriendshipStatus(status);
         });
         return PageResponse.<List<UserResponse>>builder()
                 .pageNo(pageNo)
                 .pageSize(pageSize)
                 .totalPages(userPage.getTotalPages())
+                .totalElements(userPage.getTotalElements())
                 .data(userResponses)
                 .build();
     }

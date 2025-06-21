@@ -1,11 +1,10 @@
 import { Card, Avatar, List, Button } from "antd";
 import { FaUserFriends } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import Contact from "../components/contact/contact.component";
 import { useEffect, useState } from "react";
-import { FriendShipResponse } from "../types/api";
-import friendShipService from "../services/friendShipService";
-import userService from "../services/userService";
+import { FriendShipResponse } from "../../types/api";
+import friendShipService from "../../services/friendShipService";
+import Contact from "../../components/contact/contact.component";
 
 const SidebarRight: React.FC = () => {
   const [friendshipRequests, setFriendshipRequests] = useState<
@@ -14,11 +13,12 @@ const SidebarRight: React.FC = () => {
 
   const fetchAllFriendshipRequest = async () => {
     const response = await friendShipService.getFriendRequests();
-    setFriendshipRequests(response);
+    setFriendshipRequests(response.splice(0, 2));
   };
 
-  const handleConfirm = async (userId: number) => {
-    await userService.toggleFriend(userId);
+  const handleRespond = async (id: number, status: string) => {
+    await friendShipService.respondFriendRequest(id, status);
+    fetchAllFriendshipRequest();
   };
 
   useEffect(() => {
@@ -26,7 +26,6 @@ const SidebarRight: React.FC = () => {
   }, []);
   return (
     <div className="w-full flex flex-col gap-4 pt-4 pr-2 text-[15px]">
-      {/* Friend Requests */}
       <Card
         size="small"
         title={
@@ -65,14 +64,14 @@ const SidebarRight: React.FC = () => {
                   size="small"
                   type="primary"
                   className="rounded-full bg-[#1877f2] hover:bg-[#166fe5] border-none text-[15px]"
-                  onClick={() => handleConfirm(item.requester.id)}
+                  onClick={() => handleRespond(item.requester.id, "ACCEPT")}
                 >
                   Chấp nhận
                 </Button>,
                 <Button
                   size="small"
                   className="rounded-full bg-[#f0f2f5] text-gray-800 border-none hover:bg-[#e4e6eb] text-[15px]"
-                  onClick={() => handleConfirm(item.requester.id)}
+                  onClick={() => handleRespond(item.requester.id, "REJECT")}
                 >
                   Từ chối
                 </Button>,
@@ -87,22 +86,21 @@ const SidebarRight: React.FC = () => {
                   />
                 }
                 title={
-                  <span className="font-medium text-sm text-gray-900 text-[15px]">
+                  <span className="font-medium text-sm text-gray-900 text-[15px] whitespace-nowrap">
                     {item.requester.firstName} {item.requester.lastName}
                   </span>
                 }
-                description={
-                  <span className="text-xs text-gray-500 text-[14px]">
-                    0 bạn chung
-                  </span>
-                }
+                // description={
+                //   <span className="text-xs text-gray-500 text-[14px]">
+                //     0 bạn chung
+                //   </span>
+                // }
               />
             </List.Item>
           )}
         />
       </Card>
 
-      {/* Contacts */}
       <Contact />
     </div>
   );

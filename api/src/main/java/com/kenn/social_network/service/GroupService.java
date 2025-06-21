@@ -14,6 +14,8 @@ public interface GroupService {
 
     GroupResponse getGroupById(long id);
 
+    PageResponse<List<GroupResponse>> getAllGroups(String search, int pageNo, int pageSize);
+
     PageResponse<List<GroupResponse>> getAllGroupsByCurrentUser(String search, int pageNo, int pageSize);
 
     GroupResponse updateGroupInfo(GroupUpdateRequest groupUpdateRequest);

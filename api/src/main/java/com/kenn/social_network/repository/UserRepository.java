@@ -21,6 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             OR u.lastName LIKE :search
             OR u.address LIKE :search
             OR u.email LIKE :search
+            OR u.role.name LIKE :search
             """)
     Page<User> findAll(String search, Pageable pageable);
 

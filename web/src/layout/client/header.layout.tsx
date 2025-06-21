@@ -10,13 +10,15 @@ import {
   FaFacebook,
 } from "react-icons/fa";
 import { useDispatch } from "react-redux";
-import { RootState, useAppSelector } from "../store";
-import { logout } from "../store/slices/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import type { MenuProps } from "antd";
-import authService from "../services/authService";
-import SearchBar from "../components/search/search.component";
-import NotificationPanel from "../components/notifications/notification_panel.component";
+import { useState } from "react";
+import { RiAdminLine } from "react-icons/ri";
+import { RootState, useAppSelector } from "../../store";
+import authService from "../../services/authService";
+import { logout } from "../../store/slices/authSlice";
+import SearchBar from "../../components/search/search.component";
+import NotificationPanel from "../../components/notifications/notification_panel.component";
 
 const { Header: AntHeader } = Layout;
 
@@ -38,6 +40,7 @@ const { Header: AntHeader } = Layout;
 const Header: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
   const { user } = useAppSelector((state: RootState) => state.auth);
 
   const handleLogout = async () => {
@@ -54,6 +57,17 @@ const Header: React.FC = () => {
       onClick: () => navigate(`/profile/${user?.id}`),
       className: "hover:bg-[#f0f2f5]",
     },
+    ...(user?.role === "ADMIN"
+      ? [
+          {
+            key: "dashboard",
+            icon: <RiAdminLine />,
+            label: "Trang quản trị",
+            onClick: () => navigate(`/admin`),
+            className: "hover:bg-[#f0f2f5]",
+          },
+        ]
+      : []),
     {
       key: "logout",
       icon: <FaSignOutAlt />,
@@ -101,7 +115,11 @@ const Header: React.FC = () => {
             <FaFacebookMessenger size={24} />
           </Button>
           <Dropdown
-            dropdownRender={() => <NotificationPanel />}
+            open={open}
+            onOpenChange={setOpen}
+            dropdownRender={() => (
+              <NotificationPanel onClose={() => setOpen(false)} />
+            )}
             trigger={["click"]}
             placement="bottomRight"
             arrow

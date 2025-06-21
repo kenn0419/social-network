@@ -48,7 +48,6 @@ public class WebSocketController {
             if (userId != null) {
                 log.info("User connected with ID: {}", userId);
 
-                // Update user presence to ONLINE
                 UserPresence userPresence = new UserPresence();
                 userPresence.setUserId(Long.parseLong(userId));
                 userPresence.setUserPresenceStatus(UserPresenceStatusEnum.ONLINE);
@@ -75,7 +74,6 @@ public class WebSocketController {
             if (userId != null) {
                 log.info("User disconnected with ID: {}", userId);
 
-                // Update user presence to OFFLINE
                 UserPresence userPresence = new UserPresence();
                 userPresence.setUserId(Long.parseLong(userId));
                 userPresence.setUserPresenceStatus(UserPresenceStatusEnum.OFFLINE);
@@ -85,17 +83,6 @@ public class WebSocketController {
         } catch (Exception e) {
             log.error("Error handling WebSocket disconnection: {}", e.getMessage(), e);
         }
-    }
-
-    @MessageMapping({"/friend-request", "/respond"})
-    public void handleFriendRequest(@Payload NotificationResponse notification, SimpMessageHeaderAccessor headerAccessor) {
-        String userId = headerAccessor.getUser().getName();
-        log.info("Handling friend request for user: {}", userId);
-        messagingTemplate.convertAndSendToUser(
-                userId,
-                "/queue/notifications",
-                notification
-        );
     }
 
     @MessageMapping("/status.update")

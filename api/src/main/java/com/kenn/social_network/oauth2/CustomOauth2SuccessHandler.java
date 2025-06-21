@@ -29,8 +29,8 @@ public class CustomOauth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
     @Value("${jwt.refresh-token-duration}")
     private long jwtRefreshTokenDuration;
 
-    private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
@@ -58,7 +58,7 @@ public class CustomOauth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         cookie.setMaxAge((int) jwtRefreshTokenDuration);
         response.addCookie(cookie);
 
-        String targetUrl = UriComponentsBuilder.fromUriString(redirectUri + "/oauth2/success")
+        String targetUrl = UriComponentsBuilder.fromUriString(redirectUri + "/oauth2")
                 .queryParam("token", accessToken)
                 .build()
                 .toUriString();

@@ -1,6 +1,7 @@
 package com.kenn.social_network.dto.request.post;
 
 
+import com.kenn.social_network.enums.PostTypeEnum;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,8 @@ public class PostCreationRequest {
 
     @NotNull(message = "Content can not be blank")
     private String content;
+
+    private PostTypeEnum postType;
 
     private List<MultipartFile> mediaFiles;
 }

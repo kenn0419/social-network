@@ -19,6 +19,7 @@ export interface AuthResponse {
     firstName: string;
     lastName: string;
     avatar?: string;
+    role: string;
   };
 }
 
@@ -41,7 +42,7 @@ export interface NotificationResponse {
   type: NotificationType;
   content: string;
   url: string;
-  isRead: boolean;
+  read: boolean;
   senderName: string;
   senderAvatarUrl: string;
   createdAt: string;
@@ -49,6 +50,8 @@ export interface NotificationResponse {
 
 export interface CreatePostRequest {
   content: string;
+  groupId?: number;
+  postType: string;
   mediaFiles: File[];
 }
 
@@ -63,13 +66,7 @@ export interface UserResponse {
   bio?: string;
   friendshipStatus?: string | null;
   status?: string;
-}
-
-export interface UserSearchResponse {
-  data: UserResponse[];
-  pageNo: number;
-  pageSize: number;
-  totalPages: number;
+  role: string;
 }
 
 export interface UpdateProfileRequest {
@@ -79,10 +76,11 @@ export interface UpdateProfileRequest {
   avatar?: File;
 }
 
-export interface UserSearchRequest {
-  pageNo: string;
-  pageSize: string;
+export interface SearchRequest {
+  pageNo: number;
+  pageSize: number;
   search: string;
+  sort?: string;
 }
 
 export interface ProfileResponse {
@@ -158,7 +156,8 @@ export interface PageResponse<T> {
   pageNo: number;
   pageSize: 10;
   totalPage: 0;
-  data: T;
+  totalElements: 0;
+  data: T[];
 }
 
 export interface GroupCreationRequest {

@@ -33,7 +33,13 @@ public class PostMapper {
         List<CommentResponse> commentResponses = post.getComments().stream().map(commentMapper::toCommentResponse).toList();
         List<Like> likes = post.getLikes();
         boolean isLiked = likes.stream().anyMatch(like -> like.getUser().getEmail().equals(email));
-
+        PostResponse.GroupResponse groupResponse = null;
+        if (post.getGroup() != null) {
+            groupResponse = PostResponse.GroupResponse.builder()
+                    .id(post.getGroup().getId())
+                    .name(post.getGroup().getName())
+                    .build();
+        }
         return PostResponse.builder()
                 .id(post.getId())
                 .content(post.getContent())
@@ -43,6 +49,7 @@ public class PostMapper {
                 .likeCount(likes.size())
                 .isLiked(isLiked)
                 .createdAt(post.getCreatedAt())
+                .groupResponse(groupResponse)
                 .build();
     }
 }

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { NotificationResponse } from "../../types/api";
 
 export type NotificationType =
   | "LIKE"
@@ -8,19 +9,8 @@ export type NotificationType =
   | "FRIEND_REQUEST"
   | "FRIEND_ACCEPT";
 
-export interface Notification {
-  id: number;
-  type: NotificationType;
-  avatar: string;
-  name: string;
-  content: string;
-  time: string;
-  mutual?: number;
-  unread: boolean;
-}
-
 interface NotificationState {
-  notifications: Notification[];
+  notifications: NotificationResponse[];
   unreadCount: number;
 }
 
@@ -33,9 +23,9 @@ const notificationSlice = createSlice({
   name: "notification",
   initialState,
   reducers: {
-    addNotification: (state, action: PayloadAction<Notification>) => {
+    addNotification: (state, action: PayloadAction<NotificationResponse>) => {
       state.notifications.unshift(action.payload);
-      if (action.payload.unread) {
+      if (action.payload.read) {
         state.unreadCount += 1;
       }
     },
@@ -43,18 +33,21 @@ const notificationSlice = createSlice({
       const notification = state.notifications.find(
         (n) => n.id === action.payload
       );
-      if (notification && notification.unread) {
-        notification.unread = false;
+      if (notification && notification.read) {
+        notification.read = true;
         state.unreadCount -= 1;
       }
     },
     markAllAsRead: (state) => {
-      state.notifications.forEach((n) => (n.unread = false));
+      state.notifications.forEach((n) => (n.read = true));
       state.unreadCount = 0;
     },
-    setNotifications: (state, action: PayloadAction<Notification[]>) => {
+    setNotifications: (
+      state,
+      action: PayloadAction<NotificationResponse[]>
+    ) => {
       state.notifications = action.payload;
-      state.unreadCount = action.payload.filter((n) => n.unread).length;
+      state.unreadCount = action.payload.filter((n) => !n.read).length;
     },
   },
 });

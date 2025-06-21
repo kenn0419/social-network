@@ -29,6 +29,19 @@ public class PostController {
                 .build();
     }
 
+    @GetMapping
+    SuccessResponse<PageResponse<List<PostResponse>>> getAllPosts(
+            @RequestParam(value = "search", defaultValue = "", required = false) String search,
+            @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+            @RequestParam(value = "sort", defaultValue = "id,asc") String sort
+    ) {
+        return SuccessResponse.<PageResponse<List<PostResponse>>>builder()
+                .message("Get all posts successfully!!!")
+                .data(postService.getAllPosts(search, pageNo, pageSize, sort))
+                .build();
+    }
+
     @GetMapping("/user/{userId}")
     SuccessResponse<PageResponse<List<PostResponse>>> getAllPostsByUser(
             @PathVariable("userId") long userId,
@@ -63,6 +76,14 @@ public class PostController {
         return SuccessResponse.<PostResponse>builder()
                 .message("Like/Unlike post successfully!!!")
                 .data(postService.actionPost(postId))
+                .build();
+    }
+
+    @GetMapping("/{postId}")
+    SuccessResponse<PostResponse> getPostById(@PathVariable("postId") long postId) {
+        return SuccessResponse.<PostResponse>builder()
+                .message("Get post by id successfully!!!")
+                .data(postService.getPostById(postId))
                 .build();
     }
 }

@@ -14,6 +14,15 @@ import java.util.Optional;
 public interface FriendShipRepository extends JpaRepository<Friendship, Long> {
 
     @Query("""
+        SELECT f.requester FROM Friendship f
+        WHERE f.addressee = :user AND f.status = 'ACCEPTED'
+        UNION
+        SELECT f.addressee FROM Friendship f
+        WHERE f.requester = :user AND f.status = 'ACCEPTED'
+        """)
+    List<User> findAllFriendsOfUser(@Param("user") User user);
+
+    @Query("""
                 SELECT u FROM User u
                 WHERE u.id IN (
                     SELECT CASE

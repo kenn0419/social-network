@@ -15,13 +15,14 @@ import java.util.Collections;
 public class Oauth2GithubUserInfoExtractor implements OAuth2UserInfoExtractor {
     @Override
     public CustomUserDetails extractUserInfo(OAuth2User oAuth2User) {
+        String name = retrieveAttr("name", oAuth2User);
+        String[] parts = name.split("\\s+");
         return CustomUserDetails.builder()
-                .username(retrieveAttr("email", oAuth2User))
-                .email(retrieveAttr("email", oAuth2User))
                 .avatarUrl(retrieveAttr("picture", oAuth2User))
-                .firstName(retrieveAttr("family_name", oAuth2User))
-                .lastName(retrieveAttr("given_name", oAuth2User))
+                .firstName(parts[parts.length - 1])
+                .lastName(parts[0])
                 .provider(Oauth2ProviderEnum.GITHUB)
+                .avatarUrl(retrieveAttr("avatar_url", oAuth2User))
                 .attributes(oAuth2User.getAttributes())
                 .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + RoleEnum.USER.name())))
                 .build();

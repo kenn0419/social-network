@@ -40,10 +40,10 @@ public class UserController {
 
     @GetMapping
     SuccessResponse<PageResponse<List<UserResponse>>> getAllUsers(
-            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "search", defaultValue = "", required = false) String search,
             @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
-            @RequestParam(value = "sortBy", defaultValue = "id,asc") String sort) {
+            @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
         return SuccessResponse.<PageResponse<List<UserResponse>>>builder()
                 .message(messageUtil.get("user.getAll.message"))
                 .data(userService.getAllUsers(search, pageNo, pageSize, sort))

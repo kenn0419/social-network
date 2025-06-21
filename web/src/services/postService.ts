@@ -1,10 +1,29 @@
 import axiosInstance from "../axios_customize";
-import { PostResponse, CreatePostRequest, CommentResponse } from "../types/api";
+import {
+  PostResponse,
+  CreatePostRequest,
+  CommentResponse,
+  PageResponse,
+  SearchRequest,
+} from "../types/api";
 
 const postService = {
+  async getAllPosts(query: SearchRequest): Promise<PageResponse<PostResponse>> {
+    const response = await axiosInstance.get<PageResponse<PostResponse>>(
+      `/api/v1/posts?pageNo=${query.pageNo}&pageSize=${query.pageSize}&search=${query.search}&sort=${query.sort}`
+    );
+
+    return response.data;
+  },
   async getAllPersonalPosts(userId: number): Promise<PostResponse[]> {
     const response = await axiosInstance.get<PostResponse[]>(
       `/api/v1/posts/current/${userId}`
+    );
+    return response.data;
+  },
+  async getPostById(postId: number): Promise<PostResponse> {
+    const response = await axiosInstance.get<PostResponse>(
+      `/api/v1/posts/${postId}`
     );
     return response.data;
   },
@@ -18,6 +37,10 @@ const postService = {
   async createPost(data: CreatePostRequest): Promise<PostResponse> {
     const formData = new FormData();
     formData.append("content", data.content);
+    formData.append("postType", data.postType);
+    if (data.groupId) {
+      formData.append("groupId", data.groupId.toString());
+    }
 
     // Append all media files (both images and videos) to mediaFiles array
     data.mediaFiles.forEach((file: File) => {

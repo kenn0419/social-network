@@ -1,19 +1,36 @@
 import axiosInstance from "../axios_customize";
 import {
+  PageResponse,
   ProfileResponse,
+  SearchRequest,
   UpdateProfileRequest,
   UserResponse,
-  UserSearchRequest,
-  UserSearchResponse,
 } from "../types/api";
 
 const userService = {
-  searchUser: async (query: UserSearchRequest): Promise<UserSearchResponse> => {
-    const response = await axiosInstance.get<UserSearchResponse>(
+  changeUserStatus: async (id: number, status: string) => {
+    await axiosInstance.patch(`/api/v1/users/${id}?status=${status}`);
+  },
+
+  getAllUsers: async (
+    query: SearchRequest
+  ): Promise<PageResponse<UserResponse>> => {
+    const response = await axiosInstance.get(
+      `/api/v1/users?pageNo=${query.pageNo}&pageSize=${query.pageSize}&search=${query.search}&sort=${query.sort}`
+    );
+
+    return response.data;
+  },
+
+  searchUser: async (
+    query: SearchRequest
+  ): Promise<PageResponse<UserResponse>> => {
+    const response = await axiosInstance.get<PageResponse<UserResponse>>(
       `/api/v1/users?pageNo=${query.pageNo}&pageSize=${query.pageSize}&search=${query.search}`
     );
     return response.data;
   },
+
   getProfile: async (userId: string): Promise<ProfileResponse> => {
     const response = await axiosInstance.get<ProfileResponse>(
       `/api/v1/users/profile/${userId}`

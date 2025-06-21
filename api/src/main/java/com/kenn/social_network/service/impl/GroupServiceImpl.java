@@ -9,11 +9,13 @@ import com.kenn.social_network.dto.response.page.PageResponse;
 import com.kenn.social_network.enums.GroupStatusEnum;
 import com.kenn.social_network.exception.AuthorizationException;
 import com.kenn.social_network.exception.GroupNotFoundException;
+import com.kenn.social_network.exception.UserNotFoundException;
 import com.kenn.social_network.mapper.GroupMapper;
 import com.kenn.social_network.repository.GroupRepository;
 import com.kenn.social_network.repository.UserRepository;
 import com.kenn.social_network.service.CloudinaryService;
 import com.kenn.social_network.service.GroupService;
+import com.kenn.social_network.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,8 +31,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GroupServiceImpl implements GroupService {
 
-    private final CloudinaryService cloudinaryService;
     private final GroupMapper groupMapper;
+    private final CloudinaryService cloudinaryService;
+    private final NotificationService notificationService;
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
 
@@ -47,6 +50,7 @@ public class GroupServiceImpl implements GroupService {
         newGroup.setCoverUrl(coverImageUrl != null ?
                 coverImageUrl : "https://res.cloudinary.com/dvfyiwfwo/image/upload/v1749256769/cover_default_ryqbrn.jpg");
         groupRepository.save(newGroup);
+        notificationService.createGroupNotification(newGroup);
         return groupMapper.toGroupResponse(newGroup);
     }
 
@@ -57,7 +61,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public PageResponse<List<GroupResponse>> getAllGroupsByCurrentUser(String search, int pageNo, int pageSize) {
+    public PageResponse<List<GroupResponse>> getAllGroups(String search, int pageNo, int pageSize) {
         int page = pageNo;
         if (pageNo > 0) {
             page = pageNo - 1;
@@ -69,6 +73,31 @@ public class GroupServiceImpl implements GroupService {
         }
         Pageable pageable = PageRequest.of(page, pageSize);
         Page<Group> groupPage = groupRepository.findAll(search, pageable);
+
+        return PageResponse.<List<GroupResponse>>builder()
+                .pageNo(pageNo)
+                .pageSize(pageSize)
+                .totalPages(groupPage.getTotalPages())
+                .data(groupPage.getContent().stream().map(groupMapper::toGroupResponse).toList())
+                .build();
+    }
+
+    @Override
+    public PageResponse<List<GroupResponse>> getAllGroupsByCurrentUser(String search, int pageNo, int pageSize) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        int page = pageNo;
+        if (pageNo > 0) {
+            page = pageNo - 1;
+        }
+        if (search != null && !search.isEmpty()) {
+            search = "%" + search + "%";
+        } else {
+            search = "%";
+        }
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<Group> groupPage = groupRepository.findAllOfCurrentUser(search, currentUser, pageable);
 
         return PageResponse.<List<GroupResponse>>builder()
                 .pageNo(pageNo)

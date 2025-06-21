@@ -30,7 +30,6 @@ const SearchPage: React.FC = () => {
           pageSize: PAGE_SIZE.toString(),
           search: search.trim(),
         });
-        // Map thêm trường friendshipStatus nếu cần
         setUsers(Array.isArray(response.data) ? response.data : []);
       } catch {
         setUsers([]);

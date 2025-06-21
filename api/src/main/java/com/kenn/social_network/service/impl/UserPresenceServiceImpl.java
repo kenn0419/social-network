@@ -2,6 +2,7 @@ package com.kenn.social_network.service.impl;
 
 import com.kenn.social_network.domain.UserPresence;
 import com.kenn.social_network.enums.UserPresenceStatusEnum;
+import com.kenn.social_network.repository.FriendShipRepository;
 import com.kenn.social_network.repository.UserPresenceRepository;
 import com.kenn.social_network.service.UserPresenceService;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +23,12 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class UserPresenceServiceImpl implements UserPresenceService {
-
-    private final UserPresenceRepository userPresenceRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final SimpMessagingTemplate messagingTemplate;
     private static final Duration PRESENCE_EXPIRATION = Duration.ofMinutes(3);
+
+    private final FriendShipRepository friendShipRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final UserPresenceRepository userPresenceRepository;
 
     @Override
     @Transactional
@@ -40,10 +42,10 @@ public class UserPresenceServiceImpl implements UserPresenceService {
 
         userPresence.setUserPresenceStatus(userPresenceStatus);
         userPresence.setLastActiveAt(timestamp);
-        
+
         userPresence = userPresenceRepository.save(userPresence);
         log.info("Saved user presence to database: {}", userPresence);
-        
+
         String key = "user:presence:" + userId;
         try {
             redisTemplate.opsForValue().set(key, userPresence, PRESENCE_EXPIRATION);
@@ -52,8 +54,17 @@ public class UserPresenceServiceImpl implements UserPresenceService {
             log.error("Failed to save user presence to Redis", e);
         }
 
+        List<Long> friendIds = friendShipRepository.findFriendIds(userId);
 
-        // Broadcast status update
+        for (Long friendId : friendIds) {
+            messagingTemplate.convertAndSendToUser(
+                    friendId.toString(),
+                    "/queue/status-update",
+                    userPresence
+            );
+        }
+
+
         messagingTemplate.convertAndSend("/topic/status", userPresence);
         log.info("Broadcasted status update for user {}", userId);
     }
@@ -63,8 +74,7 @@ public class UserPresenceServiceImpl implements UserPresenceService {
     public Map<Long, UserPresence> getUsersPresence(List<Long> userIds) {
         log.info("Getting presence for users: {}", userIds);
         Map<Long, UserPresence> result = new HashMap<>();
-        
-        // First try to get from Redis
+
         for (Long userId : userIds) {
             String key = "user:presence:" + userId;
             UserPresence userPresence = (UserPresence) redisTemplate.opsForValue().get(key);
@@ -84,7 +94,7 @@ public class UserPresenceServiceImpl implements UserPresenceService {
         if (!missingUserIds.isEmpty()) {
             log.info("Fetching missing presences from database for users: {}", missingUserIds);
             List<UserPresence> userPresences = userPresenceRepository.findByUserIdIn(missingUserIds);
-            
+
             // Create default presence for users not found in database
             for (Long userId : missingUserIds) {
                 if (userPresences.stream().noneMatch(p -> p.getUserId() == userId)) {
@@ -95,7 +105,7 @@ public class UserPresenceServiceImpl implements UserPresenceService {
                             .lastActiveAt(Timestamp.valueOf(LocalDateTime.now()))
                             .build();
                     result.put(userId, defaultPresence);
-                    
+
                     // Save default presence to Redis
                     String key = "user:presence:" + userId;
                     redisTemplate.opsForValue().set(key, defaultPresence, PRESENCE_EXPIRATION);
@@ -107,7 +117,7 @@ public class UserPresenceServiceImpl implements UserPresenceService {
             for (UserPresence userPresence : userPresences) {
                 log.info("Found presence in database for user {}: {}", userPresence.getUserId(), userPresence);
                 result.put(userPresence.getUserId(), userPresence);
-                
+
                 // Save to Redis
                 String key = "user:presence:" + userPresence.getUserId();
                 redisTemplate.opsForValue().set(key, userPresence, PRESENCE_EXPIRATION);

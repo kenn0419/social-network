@@ -31,6 +31,18 @@ public class GroupController {
     }
 
     @GetMapping
+    SuccessResponse<PageResponse<List<GroupResponse>>> getAllGroups(
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize
+    ) {
+        return SuccessResponse.<PageResponse<List<GroupResponse>>>builder()
+                .message("Get all groups successfully!!!")
+                .data(groupService.getAllGroups(search, pageNo, pageSize))
+                .build();
+    }
+
+    @GetMapping("/current")
     SuccessResponse<PageResponse<List<GroupResponse>>> getAllGroupsByCurrentUser(
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "pageNo", defaultValue = "1") Integer pageNo,

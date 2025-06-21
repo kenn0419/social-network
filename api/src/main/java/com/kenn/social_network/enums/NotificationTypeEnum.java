@@ -6,5 +6,6 @@ public enum NotificationTypeEnum {
     POST_TAG,
     MESSAGE,
     FRIEND_REQUEST,
-    FRIEND_ACCEPT
+    FRIEND_ACCEPT,
+    GROUP
 }

@@ -10,6 +10,8 @@ public interface PostService {
 
     PostResponse createPost(PostCreationRequest postCreationRequest);
 
+    PageResponse<List<PostResponse>> getAllPosts(String search, int pageNo, int pageSize, String sort);
+
     List<PostResponse> getPostsByCurrentUser(long userId);
 
     PageResponse<List<PostResponse>> getPostsByUser(long userId, int pageNo, int pageSize);
@@ -17,4 +19,6 @@ public interface PostService {
     void deletePost(long postId);
 
     PostResponse actionPost(long postId);
+
+    PostResponse getPostById(long postId);
 }

@@ -1,8 +1,11 @@
 import { Layout, Menu, Avatar } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { RootState } from "../store";
 import { FaUser } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import { RootState } from "../../store";
+import { GroupResponse } from "../../types/api";
+import groupService from "../../services/groupService";
 
 const { Sider } = Layout;
 
@@ -25,27 +28,19 @@ const IconFB = ({
   />
 );
 
-const shortcutGroups = [
-  {
-    key: "group1",
-    name: "Lập trình ReactJS",
-    icon: <IconFB position="0px -370px" size={28} />,
-  },
-  {
-    key: "group2",
-    name: "Học tiếng Anh mỗi ngày",
-    icon: <IconFB position="0px -406px" size={28} />,
-  },
-  {
-    key: "group3",
-    name: "Chợ sinh viên",
-    icon: <IconFB position="0px -442px" size={28} />,
-  },
-];
-
 const SidebarLeft: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
+  const [groups, setGroups] = useState<GroupResponse[]>([]);
+
+  const fetchAllGroups = async () => {
+    const response = await groupService.getAllGroupsOfUser();
+    setGroups(response.data.splice(0, 3));
+  };
+
+  useEffect(() => {
+    fetchAllGroups();
+  }, []);
 
   const menuItems = [
     {
@@ -111,9 +106,11 @@ const SidebarLeft: React.FC = () => {
         <Menu
           mode="inline"
           className="bg-white border-none text-[15px] [&_.ant-menu-item]:flex [&_.ant-menu-item]:items-center [&_.ant-menu-item]:gap-3 [&_.ant-menu-item]:hover:bg-[#f0f2f5] [&_.ant-menu-item]:rounded-lg"
-          items={shortcutGroups.map((g) => ({
-            key: g.key,
-            icon: g.icon,
+          items={groups.map((g) => ({
+            key: g.id,
+            icon: (
+              <img src={g.coverImageUrl} className="w-10 h-10 rounded-full" />
+            ),
             label: (
               <span className="text-gray-800 !text-base !font-semibold">
                 {g.name}
@@ -121,6 +118,14 @@ const SidebarLeft: React.FC = () => {
             ),
           }))}
           selectable={false}
+          onClick={(info) => {
+            const group = groups.find(
+              (group) => group.id.toString() === info.key
+            );
+            if (group) {
+              navigate(`/group/${group.id}`);
+            }
+          }}
         />
       </div>
     </Sider>

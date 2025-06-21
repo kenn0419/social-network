@@ -8,3 +8,7 @@
 .ant-menu-item {
   padding-left: 10px !important;
 }
+
+.profile-img img {
+  border-radius: 50%;
+}

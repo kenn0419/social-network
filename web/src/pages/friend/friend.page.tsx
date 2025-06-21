@@ -128,7 +128,10 @@ const FriendPage: React.FC = () => {
                     <div className="font-medium">
                       {item.firstName + " " + item.lastName}
                     </div>
-                    <Button style={{ marginTop: 12, width: "100%" }}>
+                    <Button
+                      style={{ marginTop: 12, width: "100%" }}
+                      onClick={() => navigate(`/chat?user=${item.id}`)}
+                    >
                       Nhắn tin
                     </Button>
                   </div>

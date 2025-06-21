@@ -3,6 +3,7 @@ package com.kenn.social_network.oauth2;
 import com.kenn.social_network.domain.Role;
 import com.kenn.social_network.domain.User;
 import com.kenn.social_network.enums.RoleEnum;
+import com.kenn.social_network.enums.UserStatusEnum;
 import com.kenn.social_network.repository.RoleRepository;
 import com.kenn.social_network.repository.UserRepository;
 import com.kenn.social_network.security.CustomUserDetails;
@@ -12,6 +13,12 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Map;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +42,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationException("The OAuth2 provider is not supported yet");
         }
         CustomUserDetails customUserDetails = oAuth2UserInfoExtractorOptional.get().extractUserInfo(oAuth2User);
+        String email = (String) oAuth2User.getAttributes().get("email");
+        if (email == null || email.isBlank()) {
+            String accessToken = userRequest.getAccessToken().getTokenValue();
+            email = fetchPrimaryEmail(accessToken);
+        }
+        customUserDetails.setUsername(email);
+        customUserDetails.setEmail(email);
         User user = upsertUser(customUserDetails);
         customUserDetails.setId(user.getId());
         return customUserDetails;
@@ -46,6 +60,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (optionalUser.isPresent()) {
             user = optionalUser.get();
             user.setEmail(customUserDetails.getEmail());
+            if (user.getStatus() == UserStatusEnum.BLOCK) {
+                throw new OAuth2AuthenticationException("Account is block. Please contact with admin");
+            }
         } else {
             user = User.builder()
                     .email(customUserDetails.getEmail())
@@ -53,12 +70,38 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .lastName(customUserDetails.getLastName())
                     .avatarUrl(customUserDetails.getAvatarUrl())
                     .provider(customUserDetails.getProvider())
+                    .status(UserStatusEnum.ACTIVE)
                     .build();
 
             Role existRole = roleRepository.findByName(RoleEnum.USER.name());
             user.setRole(existRole);
         }
-        // TODO: add new image here
         return userRepository.save(user);
     }
+
+    public String fetchPrimaryEmail(String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                "https://api.github.com/user/emails",
+                HttpMethod.GET,
+                entity,
+                new ParameterizedTypeReference<>() {}
+        );
+
+        for (Map<String, Object> emailEntry : response.getBody()) {
+            Boolean primary = (Boolean) emailEntry.get("primary");
+            Boolean verified = (Boolean) emailEntry.get("verified");
+            if (Boolean.TRUE.equals(primary) && Boolean.TRUE.equals(verified)) {
+                return (String) emailEntry.get("email");
+            }
+        }
+
+        return null;
+    }
+
 }

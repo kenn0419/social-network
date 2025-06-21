@@ -3,6 +3,7 @@ import SockJS from "sockjs-client";
 import { store } from "../store";
 import { addNotification } from "../store/slices/notificationSlice";
 import { notification } from "antd";
+import { updateFriendStatus } from "../store/slices/friendSlice";
 
 class SocketService {
   private client: Client | null = null;
@@ -127,6 +128,52 @@ class SocketService {
 
   public getClient(): Client | null {
     return this.client;
+  }
+
+  public subscribeToStatusUpdates(userId: number, friendIds: number[]) {
+    if (!this.client || !this.client.connected) {
+      return;
+    }
+
+    this.client.subscribe("/topic/status", (message) => {
+      const data = JSON.parse(message.body);
+      store.dispatch(updateFriendStatus(data));
+    });
+
+    this.client.subscribe(`/user/${userId}/queue/online.users`, (message) => {
+      const onlineUsers = JSON.parse(message.body);
+      Object.entries(onlineUsers).forEach(([id, presence]) => {
+        store.dispatch(
+          updateFriendStatus({
+            userId: Number(id),
+            status: presence.userPresenceStatus,
+            lastActiveAt: presence.lastActiveAt,
+          })
+        );
+      });
+    });
+
+    this.client.subscribe(`/user/${userId}/queue/status-update`, (message) => {
+      const presence = JSON.parse(message.body);
+      store.dispatch(
+        updateFriendStatus({
+          userId: presence.userId,
+          status: presence.userPresenceStatus,
+          lastActiveAt: presence.lastActiveAt,
+        })
+      );
+    });
+
+    this.sendOnlineUserRequest(friendIds);
+  }
+
+  public sendOnlineUserRequest(friendIds: number[]) {
+    if (!this.client || !this.client.connected) return;
+
+    this.client.publish({
+      destination: "/app/online.users",
+      body: JSON.stringify(friendIds),
+    });
   }
 }
 

@@ -14,6 +14,16 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query("""
+             SELECT p FROM Post p
+             WHERE p.content LIKE :search
+             OR p.user.firstName LIKE :search
+             OR p.user.lastName LIKE :search
+             OR p.user.address LIKE :search
+             OR p.group.name LIKE :search
+            """)
+    Page<Post> findAll(@Param("search") String search, Pageable pageable);
+
+    @Query("""
                 SELECT p FROM Post p
                 WHERE p.user.id IN :ids AND p.createdAt >= :fromDate AND p.postType = PERSONAL
                 ORDER BY p.createdAt DESC

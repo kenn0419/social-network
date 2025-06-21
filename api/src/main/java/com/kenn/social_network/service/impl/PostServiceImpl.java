@@ -14,6 +14,7 @@ import com.kenn.social_network.exception.UserNotFoundException;
 import com.kenn.social_network.mapper.PostMapper;
 import com.kenn.social_network.repository.*;
 import com.kenn.social_network.service.CloudinaryService;
+import com.kenn.social_network.service.NotificationService;
 import com.kenn.social_network.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -40,6 +41,7 @@ public class PostServiceImpl implements PostService {
     private final LikeRepository likeRepository;
     private final GroupRepository groupRepository;
     private final FriendShipRepository friendShipRepository;
+    private final NotificationService notificationService;
 
     @Override
     public PostResponse createPost(PostCreationRequest postCreationRequest) {
@@ -53,31 +55,32 @@ public class PostServiceImpl implements PostService {
                 .content(postCreationRequest.getContent())
                 .user(currentUser)
                 .group(existGroup)
-                .postType(postCreationRequest.getGroupId() != null ? PostTypeEnum.GROUP : PostTypeEnum.PERSONAL)
+                .postType(postCreationRequest.getPostType())
                 .build();
 
-        List<PostMedia> mediaList = postCreationRequest.getMediaFiles().stream().map(item -> {
-            String mediaUrl = cloudinaryService.getFileUrl(item);
-            MediaTypeEnum mediaTypeEnum = null;
-            if (item != null && item.getContentType() != null) {
-                if (item.getContentType().startsWith("image/")) {
-                    mediaTypeEnum = MediaTypeEnum.IMAGE;
-                } else if (item.getContentType().startsWith("video/")) {
-                    mediaTypeEnum = MediaTypeEnum.VIDEO;
+        if (postCreationRequest.getMediaFiles() != null && !postCreationRequest.getMediaFiles().isEmpty()) {
+            List<PostMedia> mediaList = postCreationRequest.getMediaFiles().stream().map(item -> {
+                String mediaUrl = cloudinaryService.getFileUrl(item);
+                MediaTypeEnum mediaTypeEnum = null;
+                if (item != null && item.getContentType() != null) {
+                    if (item.getContentType().startsWith("image/")) {
+                        mediaTypeEnum = MediaTypeEnum.IMAGE;
+                    } else if (item.getContentType().startsWith("video/")) {
+                        mediaTypeEnum = MediaTypeEnum.VIDEO;
+                    }
                 }
-            }
 
 
-            return PostMedia.builder()
-                    .url(mediaUrl)
-                    .type(mediaTypeEnum)
-                    .post(newPost)
-                    .build();
-        }).toList();
+                return PostMedia.builder()
+                        .url(mediaUrl)
+                        .type(mediaTypeEnum)
+                        .post(newPost)
+                        .build();
+            }).toList();
 
-        newPost.getPostMedias().addAll(mediaList);
+            newPost.getPostMedias().addAll(mediaList);
+        }
         postRepository.save(newPost);
-
         UserInfoResponse userInfoResponse = UserInfoResponse.builder()
                 .id(currentUser.getId())
                 .firstName(currentUser.getFirstName())
@@ -93,11 +96,39 @@ public class PostServiceImpl implements PostService {
                         .type(item.getType())
                         .build()).toList();
 
+        notificationService.createPostNotification(newPost);
+
         return PostResponse.builder()
                 .id(newPost.getId())
                 .content(newPost.getContent())
                 .author(userInfoResponse)
                 .postMedia(postMedias)
+                .build();
+    }
+
+    @Override
+    public PageResponse<List<PostResponse>> getAllPosts(String search, int pageNo, int pageSize, String sort) {
+        int page = pageNo;
+        if (pageNo > 0) {
+            page = pageNo - 1;
+        }
+        if (search != null && !search.isEmpty()) {
+            search = "%" + search + "%";
+        } else {
+            search = "%";
+        }
+        String[] sortArr = sort.split(",");
+        Sort sortBy = Sort.by(Sort.Direction.fromString(sortArr[1].toUpperCase()), sortArr[0]);
+        Pageable pageable = PageRequest.of(page, pageSize, sortBy);
+        Page<Post> postPage = postRepository.findAll(search, pageable);
+
+        List<PostResponse> postResponses = postPage.getContent().stream().map(postMapper::toPostResponse).toList();
+        return PageResponse.<List<PostResponse>>builder()
+                .pageNo(pageNo)
+                .pageSize(pageSize)
+                .totalPages(postPage.getTotalPages())
+                .totalElements(postPage.getTotalElements())
+                .data(postResponses)
                 .build();
     }
 
@@ -182,5 +213,12 @@ public class PostServiceImpl implements PostService {
         postResponse.setLikeCount(likeCount);
 
         return postResponse;
+    }
+
+    @Override
+    public PostResponse getPostById(long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found"));
+        return postMapper.toPostResponse(post);
     }
 }

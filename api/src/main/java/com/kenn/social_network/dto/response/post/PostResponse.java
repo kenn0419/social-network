@@ -28,6 +28,8 @@ public class PostResponse {
 
     private boolean isLiked;
 
+    private GroupResponse groupResponse;
+
     private List<CommentResponse> comments = new ArrayList<>();
 
     private Timestamp createdAt;
@@ -40,5 +42,13 @@ public class PostResponse {
         private String url;
 
         private MediaTypeEnum type;
+    }
+
+    @Getter
+    @Builder
+    public static class GroupResponse {
+        private long id;
+
+        private String name;
     }
 }

@@ -2,6 +2,7 @@ package com.kenn.social_network.security;
 
 import com.kenn.social_network.config.CustomAuthenticationEntryPoint;
 import com.kenn.social_network.oauth2.CustomOAuth2UserService;
+import com.kenn.social_network.oauth2.CustomOauth2FailureHandler;
 import com.kenn.social_network.oauth2.CustomOauth2SuccessHandler;
 import com.kenn.social_network.util.JwtUtil;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
@@ -64,7 +65,8 @@ public class SecurityConfig {
             HttpSecurity http,
             CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
             CustomOAuth2UserService customOAuth2UserService,
-            CustomOauth2SuccessHandler customOauth2SuccessHandler
+            CustomOauth2SuccessHandler customOauth2SuccessHandler,
+            CustomOauth2FailureHandler customOauth2FailureHandler
     ) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -82,7 +84,8 @@ public class SecurityConfig {
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(user -> user.userService(customOAuth2UserService))
-                        .successHandler(customOauth2SuccessHandler))
+                        .successHandler(customOauth2SuccessHandler)
+                        .failureHandler(customOauth2FailureHandler))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 

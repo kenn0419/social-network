@@ -2,9 +2,15 @@ import axiosInstance from "../axios_customize";
 import { GroupResponse, PageResponse } from "../types/api";
 
 const groupService = {
-  getAllGroups: async (): Promise<PageResponse<GroupResponse[]>> => {
-    const response = await axiosInstance.get<PageResponse<GroupResponse[]>>(
+  getAllGroups: async (): Promise<PageResponse<GroupResponse>> => {
+    const response = await axiosInstance.get<PageResponse<GroupResponse>>(
       `/api/v1/groups`
+    );
+    return response.data;
+  },
+  getAllGroupsOfUser: async (): Promise<PageResponse<GroupResponse>> => {
+    const response = await axiosInstance.get<PageResponse<GroupResponse>>(
+      `/api/v1/groups/current`
     );
     return response.data;
   },

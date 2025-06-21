@@ -57,8 +57,8 @@ const LoginPage: React.FC = () => {
 
   useEffect(() => {
     const handleOAuthMessage = async (event: MessageEvent) => {
-      if (event.origin !== window.origin) return; // đảm bảo an toàn
-      const { token } = event.data;
+      if (event.origin !== window.origin) return;
+      const { token, error } = event.data;
 
       if (token) {
         try {
@@ -73,6 +73,8 @@ const LoginPage: React.FC = () => {
           dispatch(loginFailure("Đăng nhập OAuth thất bại"));
           message.error(error);
         }
+      } else if (error) {
+        message.error("Đăng nhập thất bại. Vui lòng liên hệ admin");
       }
     };
 

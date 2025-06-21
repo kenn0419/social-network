@@ -59,6 +59,8 @@ public class UserMapper {
                 .address(user.getAddress())
                 .coverUrl(user.getCoverUrl())
                 .bio(user.getBio())
+                .role(user.getRole().getName())
+                .status(user.getStatus())
                 .build();
     }
 
@@ -69,6 +71,7 @@ public class UserMapper {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .avatarUrl(user.getAvatarUrl())
+                .role(user.getRole().getName())
                 .build();
     }
 

@@ -1,32 +1,17 @@
 import axiosInstance from "../axios_customize";
-import { Notification } from "../store/slices/notificationSlice";
 import { NotificationResponse } from "../types/api";
 
 const notificationService = {
-  // Notification APIs
-  getNotifications: async (): Promise<{ data: Notification[] }> => {
-    const response = await axiosInstance.get<{ data: NotificationResponse[] }>(
+  getNotifications: async (): Promise<NotificationResponse[]> => {
+    const response = await axiosInstance.get<NotificationResponse[]>(
       "/api/v1/notifications"
     );
 
-    // Transform the response to match our frontend Notification interface
-    const notifications: Notification[] = response.data.data.map(
-      (notification) => ({
-        id: notification.id,
-        type: notification.type,
-        content: notification.content,
-        avatar: notification.senderAvatarUrl,
-        name: notification.senderName,
-        time: new Date(notification.createdAt).toLocaleString(),
-        unread: !notification.isRead,
-      })
-    );
-
-    return { data: notifications };
+    return response.data;
   },
 
   markNotificationAsRead: async (notificationId: number): Promise<void> => {
-    await axiosInstance.put(`/api/v1/notifications/${notificationId}/read`);
+    await axiosInstance.patch(`/api/v1/notifications/${notificationId}/read`);
   },
 
   markAllNotificationsAsRead: async (): Promise<void> => {

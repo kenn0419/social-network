@@ -22,7 +22,7 @@ const ManageGroupPage: React.FC = () => {
   ];
 
   const fetchAllGroups = async () => {
-    const response = await groupService.getAllGroups();
+    const response = await groupService.getAllGroupsOfUser();
     setGroups(response.data);
     setLoading(false);
   };
@@ -61,7 +61,7 @@ const ManageGroupPage: React.FC = () => {
               onClick={() => navigate(`/group/${group.id}`)}
             >
               <img
-                src={group.profileImageUrl}
+                src={group.coverImageUrl}
                 alt={group.name}
                 className="w-11 h-11 rounded-full mr-4 object-cover shrink-0"
               />

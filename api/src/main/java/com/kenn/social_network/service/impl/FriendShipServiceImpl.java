@@ -79,10 +79,10 @@ public class FriendShipServiceImpl implements FriendShipService {
             friendShip.setStatus(FriendshipStatusEnum.ACCEPTED);
             friendShipRepository.save(friendShip);
             notificationService.respondFriendRequestNotification(currentUser, requester, NotificationTypeEnum.FRIEND_ACCEPT);
-            notificationRepository.deleteBySenderAndReceiver(requester.getId(), currentUser.getId());
-        }else if (friendShipRequest.getFriendShipActionStatus() == FriendShipActionStatusEnum.REJECT) {
+        } else if (friendShipRequest.getFriendShipActionStatus() == FriendShipActionStatusEnum.REJECT) {
             friendShipRepository.delete(friendShip);
         }
+        notificationRepository.deleteBySenderAndReceiver(requester.getId(), currentUser.getId());
     }
 
     @Override

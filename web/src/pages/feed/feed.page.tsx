@@ -1,7 +1,7 @@
 import { Card, Avatar, Button, List } from "antd";
 import { FaUser } from "react-icons/fa";
 import { useState, useEffect } from "react";
-import CreatePostModal from "../../components/post/create_post.component";
+import CreatePostModal from "../../components/post/create_post_modal.component";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
 import postService from "../../services/postService";
@@ -11,15 +11,16 @@ import Post from "../../components/post/post.component";
 
 const FeedPage: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
-
   const [posts, setPosts] = useState<PostResponse[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loadPosts = async () => {
     try {
-      const response = await postService.getAllPersonalPosts(user?.id);
-      setPosts(response);
+      if (user != null) {
+        const response = await postService.getAllPersonalPosts(user?.id);
+        setPosts(response);
+      }
     } catch (error) {
       console.error("Error loading posts:", error);
       message.error("Không thể tải bài viết. Vui lòng thử lại!");
@@ -36,6 +37,7 @@ const FeedPage: React.FC = () => {
       await postService.createPost({
         content,
         mediaFiles,
+        postType: "PERSONAL",
       });
       message.success("Đăng bài thành công!");
       setIsModalOpen(false);

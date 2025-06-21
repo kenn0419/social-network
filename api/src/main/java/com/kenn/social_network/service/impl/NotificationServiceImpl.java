@@ -1,11 +1,17 @@
 package com.kenn.social_network.service.impl;
 
+import com.kenn.social_network.domain.Group;
 import com.kenn.social_network.domain.Notification;
+import com.kenn.social_network.domain.Post;
 import com.kenn.social_network.domain.User;
 import com.kenn.social_network.dto.response.notification.NotificationResponse;
 import com.kenn.social_network.enums.NotificationTypeEnum;
+import com.kenn.social_network.enums.PostTypeEnum;
 import com.kenn.social_network.exception.AuthorizationException;
 import com.kenn.social_network.exception.NotificationNotFoundException;
+import com.kenn.social_network.exception.UserNotFoundException;
+import com.kenn.social_network.mapper.NotificationMapper;
+import com.kenn.social_network.repository.FriendShipRepository;
 import com.kenn.social_network.repository.NotificationRepository;
 import com.kenn.social_network.repository.UserRepository;
 import com.kenn.social_network.service.NotificationService;
@@ -15,15 +21,117 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
+    private final NotificationMapper notificationMapper;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
+    private final FriendShipRepository friendShipRepository;
+
+    @Override
+    public void createPostNotification(Post post) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        if (post.getPostType() == PostTypeEnum.PERSONAL || post.getPostType() == PostTypeEnum.PROFILE) {
+            List<User> friends = friendShipRepository.findAllFriendsOfUser(currentUser);
+            List<Notification> notifications = new ArrayList<>();
+            friends.forEach(friend -> {
+                Notification notification = Notification.builder()
+                        .content(currentUser.getFirstName() + " " + currentUser.getLastName() + " upload a new post recently")
+                        .sender(currentUser)
+                        .receiver(friend)
+                        .url("/post/" + post.getId())
+                        .isRead(false)
+                        .type(NotificationTypeEnum.POST_TAG)
+                        .build();
+
+                notifications.add(notification);
+            });
+
+            notificationRepository.saveAll(notifications);
+
+            notifications.forEach(notification -> {
+                NotificationResponse notificationResponse = notificationMapper
+                        .toNotificationResponse(notification, currentUser);
+
+                try {
+                    String destination = "/user/" + notification.getReceiver().getId() + "/queue/notifications";
+                    simpMessagingTemplate.convertAndSend(destination, notificationResponse);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        } else {
+            if (post.getGroup() != null) {
+                List<Notification> notifications = new ArrayList<>();
+                List<User> members = post.getGroup().getMembers();
+                members.forEach(member -> {
+                    Notification notification = Notification.builder()
+                            .content(currentUser.getFirstName() + " " + currentUser.getLastName() + " upload a new post recently")
+                            .sender(currentUser)
+                            .receiver(member)
+                            .url("/post/" + post.getId())
+                            .isRead(false)
+                            .type(NotificationTypeEnum.POST_TAG)
+                            .build();
+
+                    notifications.add(notification);
+                });
+
+                notificationRepository.saveAll(notifications);
+                notifications.forEach(notification -> {
+                    NotificationResponse notificationResponse = notificationMapper
+                            .toNotificationResponse(notification, currentUser);
+                    try {
+                        String destination = "/user/" + notification.getReceiver().getId() + "/queue/notifications";
+                        simpMessagingTemplate.convertAndSend(destination, notificationResponse);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+        }
+    }
+
+    @Override
+    public void createGroupNotification(Group group) {
+        List<User> members = group.getMembers();
+        if (!members.isEmpty()) {
+            List<Notification> notifications = new ArrayList<>();
+            members.forEach(member -> {
+                Notification notification = Notification.builder()
+                        .sender(group.getOwner())
+                        .receiver(member)
+                        .url("/group/" + group.getId())
+                        .isRead(false)
+                        .type(NotificationTypeEnum.GROUP)
+                        .build();
+
+                notifications.add(notification);
+            });
+            notificationRepository.saveAll(notifications);
+            notifications.forEach(notification -> {
+                NotificationResponse notificationResponse = notificationMapper.toNotificationResponse(notification, group.getOwner());
+                try {
+                    simpMessagingTemplate.convertAndSendToUser(
+                            notification.getReceiver().getId().toString(),
+                            "/queue/notifications",
+                            notificationResponse
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+    }
 
     @Override
     public void respondFriendRequestNotification(User sender, User receiver, NotificationTypeEnum notificationTypeEnum) {
@@ -37,7 +145,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (notificationTypeEnum == NotificationTypeEnum.FRIEND_REQUEST) {
             notification.setContent(sender.getFirstName() + " " + sender.getLastName() + " sent a friend request.");
-        }else {
+        } else {
             notification.setContent(sender.getFirstName() + " " + sender.getLastName() + " accept your friend request.");
         }
 
@@ -53,7 +161,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .senderAvatarUrl(sender.getAvatarUrl())
                 .createdAt(notification.getCreatedAt())
                 .build();
-        
+
         try {
             String destination = "/user/" + receiver.getId() + "/queue/notifications";
             simpMessagingTemplate.convertAndSend(destination, notificationResponse);
@@ -67,7 +175,7 @@ public class NotificationServiceImpl implements NotificationService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        List<Notification> notifications = notificationRepository.findAllByReceiver(currentUser);
+        List<Notification> notifications = notificationRepository.findAllByReceiverOrderByCreatedAtDesc(currentUser);
 
         return notifications.stream().map(notification -> NotificationResponse.builder()
                 .id(notification.getId())
@@ -94,8 +202,10 @@ public class NotificationServiceImpl implements NotificationService {
             throw new AuthorizationException("You don't have permission to mark this notification as read");
         }
 
-        notification.setRead(true);
-        notificationRepository.save(notification);
+        if (!notification.isRead()) {
+            notification.setRead(true);
+            notificationRepository.save(notification);
+        }
     }
 
     @Override
